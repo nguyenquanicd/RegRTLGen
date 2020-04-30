@@ -13,6 +13,8 @@
 //---------------------------------------------------------------
 module $GenModuleName
   #(
+    parameter  int REGGEN_WPROT_EN   = $GenWProtParam,
+    parameter  int REGGEN_SEC_EN     = $GenSecParam,
     parameter  int REGGEN_SYNC_STAGE = $GenSyncStageParam,
     parameter  int REGGEN_ADDR_WIDTH = $GenAddrParam,
     parameter  int REGGEN_DATA_WIDTH = $GenDataParam,
@@ -23,7 +25,7 @@ module $GenModuleName
     input  logic reg_clk,   //User clock
     input  logic reg_rst_n, //User reset is synchronized to reg_clk
     input  logic pclk,      //APB clock
-    input  logic presetn,   //APB reset is synchronized to pclk
+    input  logic preset_n,   //APB reset is synchronized to pclk
     //APB interface is synchronized to pclk
     input  logic psel,
     input  logic penable,
@@ -37,14 +39,14 @@ module $GenModuleName
     output logic [REGGEN_DATA_WIDTH-1:0] prdata,
     //User interface is synchronized to reg_clk
     $GenWProt input  logic write_protect_en,
-    $GenStartLoop
+    $GenStartLoop$GenRegName$GenRegField
     $RWI$RO$ROC$ROS input  logic $GenRegName_$GenRegField_ivalue,
     $RWI$RO$ROC$ROS input  logic $GenRegName_$GenRegField_iwe,
     $POW  output logic [REGGEN_STRB_WIDTH-1:0] $GenRegName_byte_we,
     $POW1 output logic $GenRegName_$GenRegField_set,
     $POW0 output logic $GenRegName_$GenRegField_clr,
     $RW$RWI$RW_RC$RW_RS$RW_WC$RW_WS$RW_W1C$RW_W0S$RW_W1S$RW_W0S$WO$WOC$WOS$WO0$WO1 output logic [REGGEN_DATA_WIDTH-1:0] $GenRegName_$GenRegField_reg
-    $GenEndLoop
+    $GenEndLoop$GenRegName$GenRegField
   );
   //pclk
   assign setup_phase = psel & ~penable;
@@ -52,9 +54,9 @@ module $GenModuleName
   $GenStartBlock$GenAsync
     //Access request
     assign req_inv = setup_phase;
-    $GenAsyncReset always_ff @ (posedge pclk, negedge presetn) begin
+    $GenAsyncReset always_ff @ (posedge pclk, negedge preset_n) begin
     $GenSyncReset always_ff @ (posedge pclk) begin
-      if (!presetn)
+      if (!preset_n)
         req_in <= '0;
       else if (req_inv)
         reg_in <= ~req_in;
@@ -66,9 +68,65 @@ module $GenModuleName
       else
         req_sync <= {req_sync[REGGEN_SYNC_STAGE-1:1], req_in};
     end
-    assign req_en = req_sync[1]
+    assign req_en = req_sync[REGGEN_SYNC_STAGE-1] ^ ack_in;
     //Access acknowledge
-    
+    $GenAsyncReset always_ff @ (posedge reg_clk, negedge reg_rst_n) begin
+    $GenSyncReset always_ff @ (posedge reg_clk) begin
+      if (!reg_clk)
+        ack_in <= '0;
+      else if (req_inv)
+        ack_in <= ~ack_in;
+    end
+    $GenAsyncReset always_ff @ (posedge pclk, negedge preset_n) begin
+    $GenSyncReset always_ff @ (posedge pclk) begin
+      if (!preset_n)
+        ack_sync <= '0;
+      else
+        ack_sync <= {ack_sync[REGGEN_SYNC_STAGE-1:1], ack_in};
+    end
+    assign ack_en = ack_sync[REGGEN_SYNC_STAGE-1] ~^ req_in;
+    assign clr_pready = req_inv;
+    $GenAsyncReset always_ff @ (posedge pclk, negedge preset_n) begin
+    $GenSyncReset always_ff @ (posedge pclk) begin
+      if (!preset_n)
+        pready <= '0;
+      else if (clr_pready)
+        pready <= '0;
+      else
+        pready <= ack_en;
+    end
   $GenEndBlock$GenAsync
+  //
+  $GenStartBlock$GenAsync$GenWProt
+    $GenAsyncReset always_ff @ (posedge reg_clk, negedge reg_rst_n) begin
+    $GenSyncReset always_ff @ (posedge reg_clk) begin
+      if (!reg_rst_n)
+        wprot_sync <= '0;
+      else
+        wprot_sync <= {wprot_sync[REGGEN_SYNC_STAGE-1:1], write_protect_en};
+    end
+    assign wprot_en_sync = wprot_sync[REGGEN_SYNC_STAGE-1];
+  $GenEndBlock$GenAsync$GenWProt
+  //
+  $GenStartBlock$GenSync
+    assign req_en = setup_phase;
+    assign pready = 1'b1;
+    assign wprot_en_sync = 1'b0;
+  $GenEndBlock$GenSync
+  //
+  assign pwrite_en = req_en & pwrite;
+  assign pread_en  = req_en & ~pwrite;
+  $GenStartLoop$GenRegName
+    assign $GenRegName_sel = (paddr == REGGEN_OFFSET_ADDR_$GenRegName);
+    assign $GenRegName_write_en = $GenRegName_sel & pwrite_en 
+                                  & (REGGEN_WPROT_EN? ~wprot_en_sync: 1'b1)
+                                  & (REGGEN_SEC_EN?   ~pprot[1]: 1'b1);
+    assign $GenRegName_read_en  = $GenRegName_sel & pread_en 
+                                  & (REGGEN_SEC_EN?   ~pprot[1]: 1'b1);
+    $GenSec assign $GenRegName_sec_error = req_en & $GenRegName_sel & pprot[1];
+  $GenEndLoop$GenRegName
+  $GenStartLoop$GenRegName$GenPStrbIndex
+    assign $GenRegName_byte_we[$GenPStrbIndex] = pstrb[$GenPStrbIndex] & $GenRegName_pwrite_en;
+  $GenEndLoop$GenRegName$GenPStrbIndex
   //
 endmodule: $GenModuleName
