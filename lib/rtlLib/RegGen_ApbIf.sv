@@ -11,10 +11,12 @@
 //Version    : 1.0
 //Date       : Apr.30.2020
 //---------------------------------------------------------------
+$GenUserHeader
 module $GenModuleName
   #(
     //Parameters are the fixed values and are created by tool. 
-    //For this reason, they are localparams and NOT changed. 
+    //For this reason, they are localparams and NOT changed.
+    //If you want to change the parameters, the RTL code shall be generated again.
     localparam int REGGEN_WPROT_MODE = $GenWProtParam,
     localparam int REGGEN_SEC_MODE   = $GenSecParam,
     localparam int REGGEN_ASYNC_MODE = $GenAsyncParam,
@@ -141,17 +143,30 @@ module $GenModuleName
   $GenStartLoop$GenRegName$GenPStrbIndex
     $RW$RWI$RW_RC$RW_RS$WO assign $GenRegName_byte_we[$GenPStrbIndex] = pstrb[$GenPStrbIndex] & $GenRegName_pwrite_en;
   $GenEndLoop$GenRegName$GenPStrbIndex
-  //Use the bit range, $GenPartialBitRange, to select the strobe index, GenPStrbIndex
+  //Use the bit range, GenPartialBitRange, to select the strobe index, GenPStrbIndex
   $GenStartLoop$GenRegName$GenRegField$GenPartialBitRange
+    //---------------------------------------
+    //Reg  : $GenRegName
+    //Field: $GenRegField
+    //Bit  : $GenPartialBitRange
+    //---------------------------------------
+    //APB Write of $GenRegName
     $RW$RWI$RW_RC$RW_RS$WO assign $GenRegName_next[$GenPartialBitRange] = $GenRegName_byte_we[$GenPStrbIndex]? pwdata[$GenPartialBitRange]: $GenRegName_sc_value[$GenPartialBitRange];
-    $RW_WS$RW_W1S$RW_W0S$WO1$ROS assign $GenRegName_sc_value[$GenPartialBitRange] = $GenRegName_$GenRegField_set? '1: $GenRegName_$GenRegField_ivalue[$GenPartialBitRange];
+    //
+    $RW_WS$RW_W1S$RW_W0S$WO1$ROS assign $GenRegName_sc_value[$GenPartialBitRange] = $GenRegName_$GenRegField_$GenPStrbIndex_set? '1: $GenRegName_$GenRegField_ivalue[$GenPartialBitRange];
+    $RW_WS assign $GenRegName_$GenRegField_$GenPStrbIndex_set = $GenRegName_byte_we[$GenPStrbIndex];
+    $RW_W1S$WO1$POW1 assign $GenRegName_$GenRegField_$GenPStrbIndex_w1 = $GenRegName_byte_we[$GenPStrbIndex] & (&pwdata[$GenPartialBitRange]);
+    $RW_W1S$WO1 assign $GenRegName_$GenRegField_$GenPStrbIndex_set = $GenRegName_$GenRegField_$GenPStrbIndex_w1;
+    $RW_W0S assign $GenRegName_$GenRegField_$GenPStrbIndex_set = $GenRegName_byte_we[$GenPStrbIndex] & (~|pwdata[$GenPartialBitRange]);
+    $ROS assign $GenRegName_$GenRegField_$GenPStrbIndex_set = $GenRegName_pread_en;
+    //
     $RW_WC$RW_W1C$RW_W0C$WO0$ROC assign $GenRegName_sc_value[$GenPartialBitRange] = $GenRegName_$GenRegField_clr? '0: $GenRegName_$GenRegField_ivalue[$GenPartialBitRange];
+    //
     $GenNOT$RW_WS$RW_W1S$RW_W0S$WO1$ROS$RW_WC$RW_W1C$RW_W0C$WO0$ROC assign $GenRegName_sc_value[$GenPartialBitRange] = $GenRegName_$GenRegField_ivalue[$GenPartialBitRange];
     //
     $RWI$RO$ROC$ROS assign $GenRegName_$GenRegField_ivalue[$GenPartialBitRange] = $GenRegName_$GenRegField_iwe? $GenRegName_$GenRegField_ivalue[$GenPartialBitRange]: $GenRegName_reg[$GenPartialBitRange];
     $GenNOT$RWI$RO$ROC$ROS assign $GenRegName_$GenRegField_ivalue[$GenPartialBitRange] = $GenRegName_reg[$GenPartialBitRange];
   $GenEndLoop$GenRegName$GenRegField$GenPartialBitRange
   //
-  
-  
+    
 endmodule: $GenModuleName
