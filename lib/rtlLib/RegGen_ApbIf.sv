@@ -18,7 +18,9 @@ module $GenModuleName
     //For this reason, they are localparams and NOT changed.
     //If you want to change the parameters, the RTL code shall be generated again.
     localparam int REGGEN_WPROT_MODE = $GenWProtParam,
+    localparam int REGGEN_WPROT_ERR  = $GenWProtErrParam,
     localparam int REGGEN_SEC_MODE   = $GenSecParam,
+    localparam int REGGEN_SEC_ERR    = $GenSecErrParam,
     localparam int REGGEN_ASYNC_MODE = $GenAsyncParam,
     localparam int REGGEN_SYNC_STAGE = $GenSyncStageParam,
     localparam int REGGEN_ADDR_WIDTH = $GenAddrParam,
@@ -139,7 +141,6 @@ module $GenModuleName
                                   & (REGGEN_SEC_MODE?   ~pprot[1]: 1'b1);
     assign $GenRegName_read_en  = $GenRegName_sel & pread_en 
                                   & (REGGEN_SEC_MODE?   ~pprot[1]: 1'b1);
-    $GenSec assign $GenRegName_sec_error = req_en & $GenRegName_sel & pprot[1];
   $GenEndLoop$GenRegName
   //
   $GenStartLoop$GenRegName$GenPStrbIndex
@@ -197,5 +198,16 @@ module $GenModuleName
   always_ff @ (posedge reg_clk) begin
     if (pread_en)
       prdata <= prdata_next;
+  end
+  //
+  assign prot_error = (REGGEN_WPROT_MODE & REGGEN_WPROT_ERR)? (pwrite_en & wprot_en_sync): '0;
+  assign sec_error  = (REGGEN_SEC_MODE & REGGEN_SEC_ERR)? pprot[1]: '0;
+  assign pslverr_nxt = prot_error | sec_error;
+  $GenAsyncReset always_ff @ (posedge reg_clk, negedge reg_rst_n) begin
+  $GenSyncReset always_ff @ (posedge reg_clk) begin
+    if (!reg_rst_n)
+      pslverr <= '0;
+    else if (req_en)
+      pslverr <= pslverr_nxt;
   end
 endmodule: $GenModuleName
