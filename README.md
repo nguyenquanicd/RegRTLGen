@@ -1,5 +1,7 @@
 # RegRTLGen
-This is the open source tool which is used to create the System Verilog RTL code of register module
+This is the open source tool which is used to create the System Verilog RTL code of register module.
+
+IT STILL DEVELOPING and NOT FINISHED NOW.
 
 # Folder Structure
 doc   : Specification documents
