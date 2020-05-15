@@ -1,7 +1,10 @@
 #!/usr/bin/python
 
+import os
 import sys
-sys.path.append("/shsv/IP8/BUS/vanle/zip/python/pyLib")
+script_path = os.path.dirname(__file__)
+lib_path = script_path + "/../pyLib"
+sys.path.append(lib_path)
 
 from openpyxl import Workbook
 from openpyxl import load_workbook
