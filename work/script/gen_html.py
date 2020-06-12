@@ -13,9 +13,9 @@ from sys import argv
 script_path = os.path.dirname(__file__)
 lib_path = script_path + "/../../lib/pyLib"
 sys.path.append(lib_path)
+from RegSpec import RegSpec
 
 ## Main process
-from RegSpec import *
 
 # finish
 open("finish_gen_html", 'w').close()

@@ -13,23 +13,21 @@ from sys import argv
 script_path = os.path.dirname(__file__)
 lib_path = script_path + "/../../lib/pyLib"
 sys.path.append(lib_path)
-
-## Main process
 from openpyxl import load_workbook
 
+## Main process
 # load input spec
 input_file = argv[1]
 workbook = load_workbook(filename=input_file)
 
 # create variable structure
-RegSpec = open(script_path + "/RegSpec.py","w")
-content = "RegSpec = {}\n"
-RegSpec.write(content) # new RegSpec
+RegSpec = open(script_path + "/RegSpec.py", "w")
+RegSpec.write("RegSpec = {}\n") # new RegSpec
 
 # CommonInfo sheet
 CommonInfoSheet = workbook["CommonInfo"]
 common_table_flag = 0
-line = ''
+line = "\n"
 for row in CommonInfoSheet.rows:
   if common_table_flag == 1:
     if row[0].value != 'x':
@@ -39,16 +37,16 @@ for row in CommonInfoSheet.rows:
       line = line.rstrip(": ") + "\n"
   else:
     if row[0].value == 'GenEn': # begin of CommonInfo table
-      common_table_flag = 1
-content = "RegSpec['Common_Info'] = \"\"\"%s\"\"\"\n" % line
-RegSpec.write(content) # add RegSpec['Common_Info']
+      common_table_flag = 1  
+line = re.sub("\n", "\n//", line) # add // for comment in rtl code
+RegSpec.write("RegSpec['GenUserHeader'] = \"\"\"%s\"\"\"\n" % line) # add RegSpec['GenUserHeader']
 
 # Module specifications
 for sheet in workbook:
   if re.search("^RegSpec_", sheet.title):
+    # new RegSpec['RegSpec_*']
     content = "RegSpec['%s'] = {}\n" % sheet.title
-    RegSpec.write(content) # new RegSpec['RegSpec_*']
-    
+
     config_table_flag = 0
     register_table_flag = 0
     register_count = 0
@@ -60,29 +58,41 @@ for sheet in workbook:
         elif row[0].value == 'Property': # info row
           continue
         elif row[0].value == 'Gen':
-          config = 'Gen'
+          if row[1].value == 'Yes':
+            gen_flag = 1
+            continue
+          else:
+            gen_flag = 0 # skip spec, reduce time
+            break
         elif row[0].value == 'Module name':
-          config = 'Module_Name'
-        elif row[0].value == 'Interface':
-          config = 'Interface'
-        elif row[0].value == 'DataWidth':
-          config = 'DataWidth'
-        elif row[0].value == 'AddrWidth':
-          config = 'AddrWidth'
+          content += "RegSpec['%s']['Common_Config']['%s'] = \"%s\"\n" % (sheet.title, 'GenModuleName',     row[1].value)
+        elif row[0].value == 'Interface':                                                                   
+          content += "RegSpec['%s']['Common_Config']['%s'] = \"%s\"\n" % (sheet.title, 'Interface',         row[1].value)
+        elif row[0].value == 'DataWidth':                                                                   
+          content += "RegSpec['%s']['Common_Config']['%s'] = \"%s\"\n" % (sheet.title, 'GenDataParam',      row[1].value)
+        elif row[0].value == 'AddrWidth':                                                                   
+          content += "RegSpec['%s']['Common_Config']['%s'] = \"%s\"\n" % (sheet.title, 'GenAddrParam',      row[1].value)
         elif row[0].value == 'Reset':
-          config = 'Reset'
+          GenAsyncReset = 1 if row[1].value == 'Async' else 0
+          GenSyncReset = 0 if row[1].value == 'Async' else 1
+          content += "RegSpec['%s']['Common_Config']['%s'] = \"%s\"\n" % (sheet.title, 'GenAsyncReset',     GenAsyncReset)
+          content += "RegSpec['%s']['Common_Config']['%s'] = \"%s\"\n" % (sheet.title, 'GenSyncReset',      GenSyncReset)
         elif row[0].value == 'Synchronization':
-          config = 'Synchronization'
+          GenAsyncParam = 1 if row[1].value == 'Async' else 0
+          content += "RegSpec['%s']['Common_Config']['%s'] = \"%s\"\n" % (sheet.title, 'GenAsyncParam',     GenAsyncParam)
         elif row[0].value == 'SynchronousStage':
-          config = 'SynchronousStage'
+          content += "RegSpec['%s']['Common_Config']['%s'] = \"%s\"\n" % (sheet.title, 'GenSyncStageParam', row[1].value)
         elif row[0].value == 'Write protection':
-          config = 'Write_Protection'
+          GenWProtParam = 1 if row[1].value == 'Yes' else 0
+          content += "RegSpec['%s']['Common_Config']['%s'] = \"%s\"\n" % (sheet.title, 'GenWProtParam',     GenWProtParam)
         elif row[0].value == 'Secure':
-          config = 'Secure'
+          GenSecParam = 1 if row[1].value == 'Yes' else 0
+          content += "RegSpec['%s']['Common_Config']['%s'] = \"%s\"\n" % (sheet.title, 'GenSecParam',       GenSecParam)
         elif row[0].value == 'SlaveError':
-          config = 'SlaveError'
-        content = "RegSpec['%s']['Common_Config']['%s'] = \"%s\"\n" % (sheet.title, config, row[1].value)
-        RegSpec.write(content)
+          GenWProtErrParam = 1 if 'WProt' in row[1].value else 0
+          GenSecErrParam = 1 if 'Sec' in row[1].value else 0
+          content += "RegSpec['%s']['Common_Config']['%s'] = \"%s\"\n" % (sheet.title, 'GenWProtErrParam',  GenWProtErrParam)
+          content += "RegSpec['%s']['Common_Config']['%s'] = \"%s\"\n" % (sheet.title, 'GenSecErrParam',    GenSecErrParam)
       elif register_table_flag == 1:
         if row[0].value == None: # end of table
           register_table_flag = 0
@@ -90,124 +100,101 @@ for sheet in workbook:
         elif row[0].value == 'Bit': # info row
           continue
         else:
-          register_field_count += 1
-          register_field_name = "Register_Field_No_" + str(register_field_count)
+          if row[2].value not in temp_register: # new GenRegField
+            temp_register[row[2].value] = {}
+            register_field_count += 1
+            register_field_count_current = register_field_count
+            register_field_name = "Register_Field_No_" + str(register_field_count_current)
+            register_field_split_count = 0
+            
+            # new RegSpec['RegSpec_*']['<register>']['<register_field>']
+            content += "RegSpec['%s']['%s']['%s'] = {}\n" % (sheet.title, register_name, register_field_name)
+  
+            # new RegSpec['RegSpec_*']['<register>']['<register_field>']['Common_Config']
+            content += "RegSpec['%s']['%s']['%s']['Common_Config'] = {}\n" % (sheet.title, register_name, register_field_name)
           
-          content = "RegSpec['%s']['%s']['%s'] = {}\n" % (sheet.title, register_name, register_field_name)
-          RegSpec.write(content) # new RegSpec['RegSpec_*']['<register>']['<register_field>']
-          
-          content = "RegSpec['%s']['%s']['%s']['Common_Config'] = {}\n" % (sheet.title, register_name, register_field_name)
-          RegSpec.write(content) # new RegSpec['RegSpec_*']['<register>']['<register_field>']['Common_Config']
-          
-          config = 'Field_Name'
-          content = "RegSpec['%s']['%s']['%s']['Common_Config']['%s'] = \"%s\"\n" % (sheet.title, register_name, register_field_name, config, row[2].value)
-          RegSpec.write(content)
-          
-          config = 'Field_Desciption'
-          content = "RegSpec['%s']['%s']['%s']['Common_Config']['%s'] = \"\"\"%s\"\"\"\n" % (sheet.title, register_name, register_field_name, config, row[4].value)
-          RegSpec.write(content)
-          
+            # GenRegField, Field_Desciption & RW_Property
+            content += "RegSpec['%s']['%s']['%s']['Common_Config']['%s'] = \"%s\"\n" % (sheet.title, register_name, register_field_name, 'GenRegField', row[2].value)
+            content += "RegSpec['%s']['%s']['%s']['Common_Config']['%s'] = \"\"\"%s\"\"\"\n" % (sheet.title, register_name, register_field_name, 'Field_Desciption', row[4].value)
+            content += "RegSpec['%s']['%s']['%s']['Common_Config']['%s'] = []\n" % (sheet.title, register_name, register_field_name, 'RW_Property')
+          else: # continue for GenRegField from previous split
+            register_field_count_current = temp_register[row[2].value]['field_count']
+            register_field_name = "Register_Field_No_" + str(register_field_count_current)
+            register_field_split_count = temp_register[row[2].value]['split_count']
+            
+          # split property of GenRegField
           bit_range_list = str(row[0].value).split('/')
           reset_value_list = str(row[1].value).split('/')
           RW_property_list = str(row[3].value).split('/')
           
-          # correct len, in cased user not define fully
+          # correct len of reset_value_list, in cased user not define fully
           if len(reset_value_list) < len(bit_range_list):
             for i in range(len(reset_value_list), len(bit_range_list)):
               reset_value_list.append("'0")
           
-          register_field_split_count = 0
           for i in range(0, len(bit_range_list)):
             register_field_split_count += 1
             register_field_split_name = "Register_Field_Split_No_" + str(register_field_split_count)
-            content = "RegSpec['%s']['%s']['%s']['%s'] = {}\n" % (sheet.title, register_name, register_field_name, register_field_split_name)
-            RegSpec.write(content) # new RegSpec['RegSpec_*']['<register>']['<register_field>']['<register_field_split>']
             
-            config = 'Bit_Range'
-            content = "RegSpec['%s']['%s']['%s']['%s']['%s'] = \"%s\"\n" % (sheet.title, register_name, register_field_name, register_field_split_name, config, bit_range_list[i])
-            RegSpec.write(content)
             
-            config = 'Reset_Value'
-            content = "RegSpec['%s']['%s']['%s']['%s']['%s'] = \"%s\"\n" % (sheet.title, register_name, register_field_name, register_field_split_name, config, reset_value_list[i])
-            RegSpec.write(content)
+            # new RegSpec['RegSpec_*']['<register>']['<register_field>']['<register_field_split>']
+            content += "RegSpec['%s']['%s']['%s']['%s'] = {}\n" % (sheet.title, register_name, register_field_name, register_field_split_name)
             
-            config = 'Strobe_Index'
+            # GenPartialBitRange & GenFieldReset of BitRange
+            content += "RegSpec['%s']['%s']['%s']['%s']['%s'] = \"%s\"\n" % (sheet.title, register_name, register_field_name, register_field_split_name, 'GenPartialBitRange', bit_range_list[i])
+            content += "RegSpec['%s']['%s']['%s']['%s']['%s'] = \"%s\"\n" % (sheet.title, register_name, register_field_name, register_field_split_name, 'GenFieldReset', reset_value_list[i])
+            
+            # estimate Strobe_Index
             bit_range_list_array = str(bit_range_list[i]).split(':')
             bit_max = int(max(bit_range_list_array))
-            if bit_max < 8:
-              strobe_index = 0
-            elif bit_max < 16:
-              strobe_index = 1
-            elif bit_max < 24:
-              strobe_index = 2
-            elif bit_max < 32:
-              strobe_index = 3
-            content = "RegSpec['%s']['%s']['%s']['%s']['%s'] = \"%s\"\n" % (sheet.title, register_name, register_field_name, register_field_split_name, config, strobe_index)
-            RegSpec.write(content)
+            strobe_index = int(bit_max/8)
             
-            config = 'RW_Property'
-            content = "RegSpec['%s']['%s']['%s']['%s']['%s'] = []\n" % (sheet.title, register_name, register_field_name, register_field_split_name, config)
-            RegSpec.write(content)
+            # Strobe_Index
+            content += "RegSpec['%s']['%s']['%s']['%s']['%s'] = \"%s\"\n" % (sheet.title, register_name, register_field_name, register_field_split_name, 'GenPStrbIndex', strobe_index)
+            
+            # RW_Property
+            content += "RegSpec['%s']['%s']['%s']['%s']['%s'] = []\n" % (sheet.title, register_name, register_field_name, register_field_split_name, 'RW_Property')
             for i in range(0, len(RW_property_list)): 
-              content = "RegSpec['%s']['%s']['%s']['%s']['%s'].append(\"%s\")\n" % (sheet.title, register_name, register_field_name, register_field_split_name, config, RW_property_list[i])
-              RegSpec.write(content)
-              
-              if strobe_index == 0:
-                content = "RegSpec['%s']['%s']['Common_Config']['%s']['Strobe_0'].append(\"%s\")\n" % (sheet.title, register_name, config, RW_property_list[i])
-              elif strobe_index == 1:
-                content = "RegSpec['%s']['%s']['Common_Config']['%s']['Strobe_1'].append(\"%s\")\n" % (sheet.title, register_name, config, RW_property_list[i])
-              elif strobe_index == 2:
-                content = "RegSpec['%s']['%s']['Common_Config']['%s']['Strobe_2'].append(\"%s\")\n" % (sheet.title, register_name, config, RW_property_list[i])
-              elif strobe_index == 3:
-                content = "RegSpec['%s']['%s']['Common_Config']['%s']['Strobe_3'].append(\"%s\")\n" % (sheet.title, register_name, config, RW_property_list[i])
-              RegSpec.write(content)
+              content += "RegSpec['%s']['%s']['%s']['%s']['%s'].append(\"%s\")\n" % (sheet.title, register_name, register_field_name, register_field_split_name, 'RW_Property', RW_property_list[i])
+              # whole field RW_Property
+              content += "RegSpec['%s']['%s']['%s']['Common_Config']['%s'].append(\"%s\")\n" % (sheet.title, register_name, register_field_name, 'RW_Property', RW_property_list[i])
+              # whole register RW_Property
+              strobe_config = "Strobe_" + str(strobe_index)
+              content += "RegSpec['%s']['%s']['Common_Config']['%s']['%s'].append(\"%s\")\n" % (sheet.title, register_name, 'RW_Property', strobe_config, RW_property_list[i])
+          
+          temp_register[row[2].value]['field_count'] = register_field_count_current
+          temp_register[row[2].value]['split_count'] = register_field_split_count
       else:
         if row[0].value == 'Table':
           if row[1].value == 'RegFile': # begin of config table
             config_table_flag = 1
-            content = "RegSpec['%s']['Common_Config'] = {}\n" % sheet.title
-            RegSpec.write(content) # new RegSpec['RegSpec_*']['Common_Config'] 
-          else:  # begin of register tables
+            # new RegSpec['RegSpec_*']['Common_Config'] 
+            content += "RegSpec['%s']['Common_Config'] = {}\n" % sheet.title
+          elif row[1].value == 'Gen':  # begin of register tables (Gen enable)
             register_table_flag = 1
             register_count += 1
             register_name = "Register_No_" + str(register_count)
             register_field_count = 0
+            temp_register = {}
             
-            content = "RegSpec['%s']['%s'] = {}\n" % (sheet.title, register_name)
-            RegSpec.write(content) # new RegSpec['RegSpec_*']['<register>']
+            # new RegSpec['RegSpec_*']['<register>']
+            content += "RegSpec['%s']['%s'] = {}\n" % (sheet.title, register_name)
+
+            # new RegSpec['RegSpec_*']['<register>']['Common_Config']
+            content += "RegSpec['%s']['%s']['Common_Config'] = {}\n" % (sheet.title, register_name)
             
-            content = "RegSpec['%s']['%s']['Common_Config'] = {}\n" % (sheet.title, register_name)
-            RegSpec.write(content) # new RegSpec['RegSpec_*']['<register>']['Common_Config']
+            # GenRegName, Register_Description & Initial_Value
+            content += "RegSpec['%s']['%s']['Common_Config']['%s'] = \"%s\"\n" % (sheet.title, register_name, 'GenRegName',           row[2].value)
+            content += "RegSpec['%s']['%s']['Common_Config']['%s'] = \"%s\"\n" % (sheet.title, register_name, 'Register_Description', row[3].value)
+            content += "RegSpec['%s']['%s']['Common_Config']['%s'] = \"%s\"\n" % (sheet.title, register_name, 'Initial_Value',        row[4].value)
             
-            config = 'Generate_Flag'
-            content = "RegSpec['%s']['%s']['Common_Config']['%s'] = \"%s\"\n" % (sheet.title, register_name, config, row[1].value)
-            RegSpec.write(content)
-            
-            config = 'Register_Name'
-            content = "RegSpec['%s']['%s']['Common_Config']['%s'] = \"%s\"\n" % (sheet.title, register_name, config, row[2].value)
-            RegSpec.write(content)
-            
-            config = 'Register_Description'
-            content = "RegSpec['%s']['%s']['Common_Config']['%s'] = \"%s\"\n" % (sheet.title, register_name, config, row[3].value)
-            RegSpec.write(content)
-            
-            config = 'Initial_Value'
-            content = "RegSpec['%s']['%s']['Common_Config']['%s'] = \"%s\"\n" % (sheet.title, register_name, config, row[4].value)
-            RegSpec.write(content)
-            
-            config = 'RW_Property'
-            content = "RegSpec['%s']['%s']['Common_Config']['%s'] = {}\n" % (sheet.title, register_name, config)
-            RegSpec.write(content)
-            content = "RegSpec['%s']['%s']['Common_Config']['%s']['Strobe_0'] = []\n" % (sheet.title, register_name, config)
-            RegSpec.write(content)
-            content = "RegSpec['%s']['%s']['Common_Config']['%s']['Strobe_1'] = []\n" % (sheet.title, register_name, config)
-            RegSpec.write(content)
-            content = "RegSpec['%s']['%s']['Common_Config']['%s']['Strobe_2'] = []\n" % (sheet.title, register_name, config)
-            RegSpec.write(content)
-            content = "RegSpec['%s']['%s']['Common_Config']['%s']['Strobe_3'] = []\n" % (sheet.title, register_name, config)
-            RegSpec.write(content)
-            
-          
+            # new list of RW_Property
+            content += "RegSpec['%s']['%s']['Common_Config']['%s'] = {}\n" % (sheet.title, register_name, 'RW_Property')
+            for i in range(0, 4):
+              strobe_config = "Strobe_" + str(i)
+              content += "RegSpec['%s']['%s']['Common_Config']['%s']['%s'] = []\n" % (sheet.title, register_name, 'RW_Property', strobe_config)
+    if gen_flag == 1:
+      RegSpec.write(content)
 # finish
 RegSpec.close()    
 open("finish_read_input", 'w').close()
