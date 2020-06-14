@@ -49,7 +49,7 @@ module $GenModuleName
     $GenStartLoop$GenRegName
       $POW$POW0$POW1 output logic $GenRegName_write_en,
       $POR output logic $GenRegName_read_en,
-      $POWS$POW$POW0$POW1 output logic [REGGEN_STRB_WIDTH-1:0] $GenRegName_byte_we,
+      $POW$POW0$POW1 output logic [REGGEN_STRB_WIDTH-1:0] $GenRegName_byte_we,
     $GenEndLoop$GenRegName
     $GenStartLoop$GenRegName$GenRegField
       $RWI$RO$ROC$ROS input  logic [$GenFullBitRange] $GenRegName_$GenRegField_ivalue,
@@ -196,6 +196,10 @@ module $GenModuleName
     $WO$WO1$WO0$WOC$WOS assign $GenRegName_$GenRegField_rvalue[$GenPartialBitRange] = '0;
   $GenEndLoop$GenRegName$GenRegField$GenPartialBitRange
   //Create a variable to store $GenRDataOR = OR($GenRegName_rvalue)
+  $GenStartLoop$GenRegName
+  assign $GenRegName_rvalue = {REGGEN_DATA_WIDTH{$GenRegName_read_en}} & $GenRegName_reg;
+  $GenRDataOR
+  $GenEndLoop$GenRegName
   assign prdata_next = $GenRDataOR;
   //
   always_ff @ (posedge reg_clk) begin
@@ -213,4 +217,5 @@ module $GenModuleName
     else if (req_en)
       pslverr <= pslverr_nxt;
   end
+  //
 endmodule: $GenModuleName
