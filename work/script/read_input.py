@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import sys
 import os
@@ -113,10 +113,11 @@ for sheet in workbook:
             # new RegSpec['RegSpec_*']['<register>']['<register_field>']['Common_Config']
             content += "RegSpec['%s']['%s']['%s']['Common_Config'] = {}\n" % (sheet.title, register_name, register_field_name)
           
-            # GenRegField, Field_Desciption & RW_Property
+            # GenRegField, Field_Desciption, RW_Property, & Ful_BitRange
             content += "RegSpec['%s']['%s']['%s']['Common_Config']['%s'] = \"%s\"\n" % (sheet.title, register_name, register_field_name, 'GenRegField', row[2].value)
             content += "RegSpec['%s']['%s']['%s']['Common_Config']['%s'] = \"\"\"%s\"\"\"\n" % (sheet.title, register_name, register_field_name, 'Field_Desciption', row[4].value)
             content += "RegSpec['%s']['%s']['%s']['Common_Config']['%s'] = []\n" % (sheet.title, register_name, register_field_name, 'RW_Property')
+            content += "RegSpec['%s']['%s']['%s']['Common_Config']['%s'] = []\n" % (sheet.title, register_name, register_field_name, 'Ful_BitRange')
           else: # continue for GenRegField from previous split
             register_field_count_current = temp_register[row[2].value]['field_count']
             register_field_name = "Register_Field_No_" + str(register_field_count_current)
@@ -147,10 +148,15 @@ for sheet in workbook:
             # estimate Strobe_Index
             bit_range_list_array = str(bit_range_list[i]).split(':')
             bit_max = int(max(bit_range_list_array))
+            bit_min = int(min(bit_range_list_array))
             strobe_index = int(bit_max/8)
             
             # Strobe_Index
             content += "RegSpec['%s']['%s']['%s']['%s']['%s'] = \"%s\"\n" % (sheet.title, register_name, register_field_name, register_field_split_name, 'GenPStrbIndex', strobe_index)
+            
+            # Ful_BitRange
+            content += "RegSpec['%s']['%s']['%s']['Common_Config']['%s'].append(%d)\n" % (sheet.title, register_name, register_field_name, 'Ful_BitRange', bit_max)
+            content += "RegSpec['%s']['%s']['%s']['Common_Config']['%s'].append(%d)\n" % (sheet.title, register_name, register_field_name, 'Ful_BitRange', bit_min)
             
             # RW_Property
             content += "RegSpec['%s']['%s']['%s']['%s']['%s'] = []\n" % (sheet.title, register_name, register_field_name, register_field_split_name, 'RW_Property')
@@ -170,6 +176,9 @@ for sheet in workbook:
             config_table_flag = 1
             # new RegSpec['RegSpec_*']['Common_Config'] 
             content += "RegSpec['%s']['Common_Config'] = {}\n" % sheet.title
+            
+            # GenRDataOR
+            content += "RegSpec['%s']['Common_Config']['GenRDataOR'] = []\n" % sheet.title
           elif row[1].value == 'Gen':  # begin of register tables (Gen enable)
             register_table_flag = 1
             register_count += 1
@@ -187,6 +196,9 @@ for sheet in workbook:
             content += "RegSpec['%s']['%s']['Common_Config']['%s'] = \"%s\"\n" % (sheet.title, register_name, 'GenRegName',           row[2].value)
             content += "RegSpec['%s']['%s']['Common_Config']['%s'] = \"%s\"\n" % (sheet.title, register_name, 'Register_Description', row[3].value)
             content += "RegSpec['%s']['%s']['Common_Config']['%s'] = \"%s\"\n" % (sheet.title, register_name, 'Initial_Value',        row[4].value)
+            
+            # add for GenRDataOR
+            content += "RegSpec['%s']['Common_Config']['GenRDataOR'].append(\"%s_rvalue\")\n" % (sheet.title, row[2].value)
             
             # new list of RW_Property
             content += "RegSpec['%s']['%s']['Common_Config']['%s'] = {}\n" % (sheet.title, register_name, 'RW_Property')

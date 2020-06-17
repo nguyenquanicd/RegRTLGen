@@ -50,16 +50,16 @@ module $GenModuleName
       $POW$POW0$POW1 output logic $GenRegName_write_en,
       $POR output logic $GenRegName_read_en,
       $POW$POW0$POW1 output logic [REGGEN_STRB_WIDTH-1:0] $GenRegName_byte_we,
-    $GenEndLoop$GenRegName
+    $GenEndLoop
     $GenStartLoop$GenRegName$GenRegField
       $RWI$RO$ROC$ROS input  logic [$GenFullBitRange] $GenRegName_$GenRegField_ivalue,
       $RWI$RO$ROC$ROS input  logic $GenRegName_$GenRegField_iwe,
       $RW$RWI$RW_RC$RW_RS$RW_WC$RW_WS$RW_W1C$RW_W0S$RW_W1S$RW_W0S$WO$WOC$WOS$WO0$WO1 output logic [REGGEN_DATA_WIDTH-1:0] $GenRegName_$GenRegField_reg,
-    $GenEndLoop$GenRegName$GenRegField
+    $GenEndLoop
     $GenStartLoop$GenRegName$GenRegField$GenPartialBitRange
       $POW1 output logic $GenRegName_$GenRegField_$GenPStrbIndex_w1,
       $POW0 output logic $GenRegName_$GenRegField_$GenPStrbIndex_w0,
-    $GenEndLoop$GenRegName$GenRegField$GenPartialBitRange
+    $GenEndLoop
   );
   //pclk
   assign setup_phase = psel & ~penable;
@@ -145,11 +145,11 @@ module $GenModuleName
                                   & (REGGEN_SEC_MODE?   ~pprot[1]: 1'b1);
     assign $GenRegName_read_en  = $GenRegName_sel & pread_en 
                                   & (REGGEN_SEC_MODE?   ~pprot[1]: 1'b1);
-  $GenEndLoop$GenRegName
+  $GenEndLoop
   //
   $GenStartLoop$GenRegName
     $RW$RWI$RW_RC$RW_RS$WO assign $GenRegName_byte_we[$GenPStrbIndex] = pstrb[$GenPStrbIndex] & $GenRegName_write_en;
-  $GenEndLoop$GenRegName
+  $GenEndLoop
   //Use the bit range, GenPartialBitRange, to select the strobe index, GenPStrbIndex
   //---------------------------------------
   $GenStartLoop$GenRegName$GenRegField$GenPartialBitRange
@@ -177,7 +177,7 @@ module $GenModuleName
     //Write from internal operation
     $RWI$RO$ROC$ROS assign $GenRegName_$GenRegField_ivalue[$GenPartialBitRange] = $GenRegName_$GenRegField_iwe? $GenRegName_$GenRegField_ivalue[$GenPartialBitRange]: $GenRegName_reg[$GenPartialBitRange];
     $GenNOT$RWI$RO$ROC$ROS assign $GenRegName_$GenRegField_ivalue[$GenPartialBitRange] = $GenRegName_reg[$GenPartialBitRange];
-  $GenEndLoop$GenRegName$GenRegField$GenPartialBitRange
+  $GenEndLoop
   //
   $GenStartLoop$GenRegName$GenRegField$GenPartialBitRange
     assign $GenRegName_next[$GenPartialBitRange] = $GenRegName_next[$GenPartialBitRange];
@@ -188,18 +188,16 @@ module $GenModuleName
       else if ($GenRegName_byte_we[$GenPStrbIndex])
         $GenRegName_reg[$GenPartialBitRange] <= $GenRegName_next[$GenPartialBitRange];
     end
-  $GenEndLoop$GenRegName$GenRegField$GenPartialBitRange
+  $GenEndLoop
   //Read data
   $GenStartLoop$GenRegName$GenRegField$GenPartialBitRange
-  //
     $GenNOT$WO$WO1$WO0$WOC$WOS assign $GenRegName_$GenRegField_rvalue[$GenPartialBitRange] = $GenRegName_read_en? $GenRegName_reg[$GenPartialBitRange]: '0;
     $WO$WO1$WO0$WOC$WOS assign $GenRegName_$GenRegField_rvalue[$GenPartialBitRange] = '0;
-  $GenEndLoop$GenRegName$GenRegField$GenPartialBitRange
-  //Create a variable to store $GenRDataOR = OR($GenRegName_rvalue)
+  $GenEndLoop
+  //
   $GenStartLoop$GenRegName
-  assign $GenRegName_rvalue = {REGGEN_DATA_WIDTH{$GenRegName_read_en}} & $GenRegName_reg;
-  $GenRDataOR
-  $GenEndLoop$GenRegName
+    assign $GenRegName_rvalue = {REGGEN_DATA_WIDTH{$GenRegName_read_en}} & $GenRegName_reg;
+  $GenEndLoop
   assign prdata_next = $GenRDataOR;
   //
   always_ff @ (posedge reg_clk) begin

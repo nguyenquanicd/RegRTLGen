@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import sys
 import os
@@ -26,6 +26,141 @@ def normal_variables_replace(line):
       chosen_variable = re.escape("$" + variable) # variable -> \$variable
       line = re.sub(chosen_variable, RegSpec[spec_sheet]['Common_Config'][variable], line)
   return line
+
+def process_loop (loop_type, lines_temp, line_print):
+  for line_temp in lines_temp:
+    print_flag = 0
+    first_element = line_temp.split()[0] # get first element of line_temp
+    if '$GenNOT' in first_element:
+      print_flag = 1 # default is print, met condition to not print
+      first_element = first_element.replace('$GenNOT', '') # remove $GenNOT
+      line_temp = line_temp.replace('$GenNOT', '') # remove $GenNOT
+      line_temp = line_temp.replace(' ', '', 1) # remove 1 space at the  beginning
+      
+      list_condition = re.escape(first_element) # backslash: $first_element -> \$first_element
+      line_temp = re.sub(list_condition, "", line_temp) # keep rtl code, remove list_condition
+      match_condition = 0
+      
+      condition_array = first_element.replace('$', ' ').strip().split() # remove $, split into array
+      if loop_type == 1:
+        if '$GenPStrbIndex' in line_temp: # sample line got $GenPStrbIndex -> need to clone
+          line_temp_total = ''
+          for strobe_cnt in range (0, len([*RegSpec[spec_sheet][reg_key]['Common_Config']['RW_Property']])):
+            strobe_key = [*RegSpec[spec_sheet][reg_key]['Common_Config']['RW_Property']][strobe_cnt]
+            line_temp_each = line_temp
+            line_temp_each = line_temp_each.replace('$GenPStrbIndex', str(strobe_cnt)) # clone strobe line from sample line
+            for condition in condition_array:
+              if condition in RegSpec[spec_sheet][reg_key]['Common_Config']['RW_Property'][strobe_key]:
+                match_condition = 1
+                break
+            if match_condition == 0:
+              line_temp_total += line_temp_each # strobe line can print out
+            else:
+              match_condition = 0 # reset check flag
+          if line_temp_total != '':
+            line_temp = line_temp_total # replace sample line after check each strobe
+          else:
+            print_flag = 0
+        else:
+          for condition in condition_array: # check all RW property
+            for strobe_cnt in range (0, len([*RegSpec[spec_sheet][reg_key]['Common_Config']['RW_Property']])):
+              strobe_key = [*RegSpec[spec_sheet][reg_key]['Common_Config']['RW_Property']][strobe_cnt]
+              if condition in RegSpec[spec_sheet][reg_key]['Common_Config']['RW_Property'][strobe_key]:
+                match_condition = 1
+                break
+            if match_condition == 1:
+              print_flag = 0
+              break
+      else:
+        if loop_type == 2:
+          condition_check = RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['RW_Property']
+        elif loop_type == 3:
+          condition_check = RegSpec[spec_sheet][reg_key][field_key][split_key]['RW_Property']
+        for condition in condition_array: # check all RW property
+          if condition in condition_check:
+            match_condition = 1
+            print_flag = 0
+            break
+    elif '$Gen' in first_element: # first element is normal condition for gen or not gen
+      line_temp_backup = line_temp
+      
+      condition = re.escape(first_element) # backslash: $first_element -> \$first_element
+      line_temp = re.sub(condition, "", line_temp) # keep rtl code, remove condition
+      
+      condition = condition.replace('\$','')     
+      if condition in normal_conditions:
+        if RegSpec[spec_sheet]['Common_Config'][condition] == "0": # condition = 0, not gen
+          continue
+        else:
+          line_temp = line_temp.replace(' ', '', 1) # remove 1 space at the  beginning
+          print_flag = 1
+      else:
+        line_temp = line_temp_backup
+        print_flag = 1
+    elif '$' in first_element:
+      list_condition = re.escape(first_element) # backslash: $first_element -> \$first_element
+      line_temp = re.sub(list_condition, "", line_temp) # keep rtl code, remove list_condition
+      line_temp = line_temp.replace(' ', '', 1) # remove 1 space at the  beginning
+      match_condition = 0
+      
+      condition_array = first_element.replace('$', ' ').strip().split() # remove $, split into array
+      if loop_type == 1:
+        if '$GenPStrbIndex' in line_temp: # sample line got $GenPStrbIndex -> need to clone
+          line_temp_total = ''
+          for strobe_cnt in range (0, len([*RegSpec[spec_sheet][reg_key]['Common_Config']['RW_Property']])):
+            strobe_key = [*RegSpec[spec_sheet][reg_key]['Common_Config']['RW_Property']][strobe_cnt]
+            line_temp_each = line_temp
+            line_temp_each = line_temp_each.replace('$GenPStrbIndex', str(strobe_cnt)) # clone strobe line from sample line
+            for condition in condition_array:
+              if condition in RegSpec[spec_sheet][reg_key]['Common_Config']['RW_Property'][strobe_key]:
+                line_temp_total += line_temp_each # strobe line match condition to print out
+                break
+          if line_temp_total != '':
+            line_temp = line_temp_total # replace sample line after check each strobe
+            print_flag = 1  
+        else:
+          for condition in condition_array: # check all RW property
+            for strobe_cnt in range (0, len([*RegSpec[spec_sheet][reg_key]['Common_Config']['RW_Property']])):
+              strobe_key = [*RegSpec[spec_sheet][reg_key]['Common_Config']['RW_Property']][strobe_cnt]
+              if condition in RegSpec[spec_sheet][reg_key]['Common_Config']['RW_Property'][strobe_key]:
+                match_condition = 1
+                break
+            if match_condition == 1:
+              print_flag = 1
+              break
+      else:
+        if loop_type == 2:
+          condition_check = RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['RW_Property']
+        elif loop_type == 3:
+          condition_check = RegSpec[spec_sheet][reg_key][field_key][split_key]['RW_Property']
+        for condition in condition_array: # check all RW property
+          if condition in condition_check:
+            match_condition = 1
+            print_flag = 1
+            break
+    else:
+      print_flag = 1
+      
+    if print_flag == 1:
+      if '$GenRegName' in line_temp:
+        line_temp = line_temp.replace('$GenRegName', RegSpec[spec_sheet][reg_key]['Common_Config']['GenRegName'])
+      if '$GenRegField' in line_temp:
+        line_temp = line_temp.replace('$GenRegField', RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['GenRegField'])
+      if '$GenFullBitRange' in line_temp:
+        bit_max = int(max(RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['Ful_BitRange']))
+        bit_min = int(min(RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['Ful_BitRange']))
+        GenFullBitRange = str(bit_max) if bit_max == bit_min else str(bit_max) + ":" + str(bit_min)
+        line_temp = line_temp.replace('$GenFullBitRange', GenFullBitRange)
+      if '$GenPartialBitRange' in line_temp:
+        line_temp = line_temp.replace('$GenPartialBitRange', RegSpec[spec_sheet][reg_key][field_key][split_key]['GenPartialBitRange'])
+      if '$GenFieldReset' in line_temp:
+        line_temp = line_temp.replace('$GenFieldReset', RegSpec[spec_sheet][reg_key][field_key][split_key]['GenFieldReset'])
+      if '$GenPStrbIndex' in line_temp:
+        line_temp = line_temp.replace('$GenPStrbIndex', RegSpec[spec_sheet][reg_key][field_key][split_key]['GenPStrbIndex']) 
+      if '$Gen' in line_temp: # has normal variables to be replaced
+        line_temp = normal_variables_replace(line_temp)
+      line_print += line_temp
+  return line_print
   
 ## Main process
 line_print = ''
@@ -55,210 +190,21 @@ for spec_cnt in range(1, len([*RegSpec])):
               field_key = [*RegSpec[spec_sheet][reg_key]][field_cnt]
               for split_cnt in range(1, len([*RegSpec[spec_sheet][reg_key][field_key]])):
                 split_key = [*RegSpec[spec_sheet][reg_key][field_key]][split_cnt]
-
-                for line_temp in lines_temp:
-                  print_flag = 0
-                  first_element = line_temp.split()[0] # get first element of line_temp
-                  if '$GenNOT' in first_element:
-                    print_flag = 1 # default is print, met condition to not print
-                    first_element = first_element.replace('$GenNOT', '') # remove $GenNOT
-                    line_temp = line_temp.replace('$GenNOT', '') # remove $GenNOT
-                    
-                    list_condition = re.escape(first_element) # backslash: $first_element -> \$first_element
-                    line_temp = re.sub(list_condition, "", line_temp) # keep rtl code, remove list_condition
-                    match_condition = 0
-                    
-                    condition_array = first_element.replace('$', ' ').strip().split() # remove $, split into array
-                    for condition in condition_array: # check all RW property
-                      if condition in RegSpec[spec_sheet][reg_key][field_key][split_key]['RW_Property']:
-                        match_condition = 1
-                        print_flag = 0
-                        break
-                  elif '$Gen' in first_element: # first element is normal condition for gen or not gen
-                    condition = re.escape(first_element) # backslash: $first_element -> \$first_element
-                    line_temp = re.sub(condition, "", line_temp) # keep rtl code, remove condition
-                    
-                    condition = condition.replace('\$','')
-                    if condition in normal_conditions:
-                      if RegSpec[spec_sheet]['Common_Config'][condition] == "0": # condition = 0, not gen
-                        continue
-                  elif '$' in first_element:
-                    list_condition = re.escape(first_element) # backslash: $first_element -> \$first_element
-                    line_temp = re.sub(list_condition, "", line_temp) # keep rtl code, remove list_condition
-                    match_condition = 0
-                    
-                    condition_array = first_element.replace('$', ' ').strip().split() # remove $, split into array
-                    for condition in condition_array: # check all RW property
-                      if condition in RegSpec[spec_sheet][reg_key][field_key][split_key]['RW_Property']:
-                        match_condition = 1
-                        print_flag = 1
-                        break
-                  else:
-                    print_flag = 1
-                    
-                  if print_flag == 1:
-                    if '$GenRegName' in line_temp:
-                      line_temp = line_temp.replace('$GenRegName', RegSpec[spec_sheet][reg_key]['Common_Config']['GenRegName'])
-                    if '$GenRegField' in line_temp:
-                      line_temp = line_temp.replace('$GenRegField', RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['GenRegField'])
-                    if '$GenPartialBitRange' in line_temp:
-                      line_temp = line_temp.replace('$GenPartialBitRange', RegSpec[spec_sheet][reg_key][field_key][split_key]['GenPartialBitRange'])
-                    if '$GenFieldReset' in line_temp:
-                      line_temp = line_temp.replace('$GenFieldReset', RegSpec[spec_sheet][reg_key][field_key][split_key]['GenFieldReset'])
-                    if '$GenPStrbIndex' in line_temp:
-                      line_temp = line_temp.replace('$GenPStrbIndex', RegSpec[spec_sheet][reg_key][field_key][split_key]['GenPStrbIndex']) 
-                    if '$Gen' in line_temp: # has normal variables to be replaced
-                      line_temp = normal_variables_replace(line_temp)
-                    line_print += line_temp  
+                line_print = process_loop(3, lines_temp, line_print)
         elif loop_flag == 2:
           for reg_cnt in range(1, len([*RegSpec[spec_sheet]])):
             reg_key = [*RegSpec[spec_sheet]][reg_cnt]
             for field_cnt in range(1, len([*RegSpec[spec_sheet][reg_key]])):
               field_key = [*RegSpec[spec_sheet][reg_key]][field_cnt]
-              
-              for line_temp in lines_temp:
-                print_flag = 0
-                first_element = line_temp.split()[0] # get first element of line_temp
-                if '$GenNOT' in first_element:
-                  print_flag = 1 # default is print, met condition to not print
-                  first_element = first_element.replace('$GenNOT', '') # remove $GenNOT
-                  line_temp = line_temp.replace('$GenNOT', '') # remove $GenNOT
-                  
-                  list_condition = re.escape(first_element) # backslash: $first_element -> \$first_element
-                  line_temp = re.sub(list_condition, "", line_temp) # keep rtl code, remove list_condition
-                  match_condition = 0
-                  
-                  condition_array = first_element.replace('$', ' ').strip().split() # remove $, split into array
-                  for condition in condition_array: # check all RW property
-                    if condition in RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['RW_Property']:
-                      match_condition = 1
-                      print_flag = 0
-                      break
-                elif '$Gen' in first_element: # first element is normal condition for gen or not gen
-                  condition = re.escape(first_element) # backslash: $first_element -> \$first_element
-                  line_temp = re.sub(condition, "", line_temp) # keep rtl code, remove condition
-                  
-                  condition = condition.replace('\$','')
-                  if condition in normal_conditions:
-                    if RegSpec[spec_sheet]['Common_Config'][condition] == "0": # condition = 0, not gen
-                      continue
-                elif '$' in first_element:
-                  list_condition = re.escape(first_element) # backslash: $first_element -> \$first_element
-                  line_temp = re.sub(list_condition, "", line_temp) # keep rtl code, remove list_condition
-                  match_condition = 0
-                  
-                  condition_array = first_element.replace('$', ' ').strip().split() # remove $, split into array
-                  for condition in condition_array: # check all RW property
-                    if condition in RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['RW_Property']:
-                      match_condition = 1
-                      print_flag = 1
-                      break
-                else:
-                  print_flag = 1
-                
-                if print_flag == 1:
-                  if '$GenRegName' in line_temp:
-                    line_temp = line_temp.replace('$GenRegName', RegSpec[spec_sheet][reg_key]['Common_Config']['GenRegName'])
-                  if '$GenRegField' in line_temp:
-                    line_temp = line_temp.replace('$GenRegField', RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['GenRegField'])
-                  if '$Gen' in line_temp: # has normal variables to be replaced
-                    line_temp = normal_variables_replace(line_temp)
-                  line_print += line_temp
+              line_print = process_loop(2, lines_temp, line_print)
         elif loop_flag == 1:
           for reg_cnt in range(1, len([*RegSpec[spec_sheet]])):
             reg_key = [*RegSpec[spec_sheet]][reg_cnt]
-            
-            for line_temp in lines_temp:
-              print_flag = 0
-              first_element = line_temp.split()[0] # get first element of line_temp
-              if '$GenNOT' in first_element:
-                print_flag = 1 # default is print, met condition to not print
-                first_element = first_element.replace('$GenNOT', '') # remove $GenNOT
-                line_temp = line_temp.replace('$GenNOT', '') # remove $GenNOT
-                
-                list_condition = re.escape(first_element) # backslash: $first_element -> \$first_element
-                line_temp = re.sub(list_condition, "", line_temp) # keep rtl code, remove list_condition
-                match_condition = 0
-                
-                condition_array = first_element.replace('$', ' ').strip().split() # remove $, split into array
-                if '$GenPStrbIndex' in line_temp: # sample line got $GenPStrbIndex -> need to clone
-                  line_temp_total = ''
-                  for strobe_cnt in range (0, len([*RegSpec[spec_sheet][reg_key]['Common_Config']['RW_Property']])):
-                    strobe_key = [*RegSpec[spec_sheet][reg_key]['Common_Config']['RW_Property']][strobe_cnt]
-                    line_temp_each = line_temp
-                    line_temp_each = line_temp_each.replace('$GenPStrbIndex', str(strobe_cnt)) # clone strobe line from sample line
-                    for condition in condition_array:
-                      if condition in RegSpec[spec_sheet][reg_key]['Common_Config']['RW_Property'][strobe_key]:
-                        match_condition = 1
-                        break
-                    if match_condition == 0:
-                      line_temp_total += line_temp_each # strobe line can print out
-                    else:
-                      match_condition = 0 # reset check flag
-                  if line_temp_total != '':
-                    line_temp = line_temp_total # replace sample line after check each strobe
-                  else:
-                    print_flag = 0
-                else:
-                  for condition in condition_array: # check all RW property
-                    for strobe_cnt in range (0, len([*RegSpec[spec_sheet][reg_key]['Common_Config']['RW_Property']])):
-                      strobe_key = [*RegSpec[spec_sheet][reg_key]['Common_Config']['RW_Property']][strobe_cnt]
-                      if condition in RegSpec[spec_sheet][reg_key]['Common_Config']['RW_Property'][strobe_key]:
-                        match_condition = 1
-                        break
-                    if match_condition == 1:
-                      print_flag = 0
-                      break
-              elif '$Gen' in first_element: # first element is normal condition for gen or not gen
-                condition = re.escape(first_element) # backslash: $first_element -> \$first_element
-                line_temp = re.sub(condition, "", line_temp) # keep rtl code, remove condition
-                
-                condition = condition.replace('\$','')
-                if condition in normal_conditions:
-                  if RegSpec[spec_sheet]['Common_Config'][condition] == "0": # condition = 0, not gen
-                    continue
-              elif '$' in first_element:
-                list_condition = re.escape(first_element) # backslash: $first_element -> \$first_element
-                line_temp = re.sub(list_condition, "", line_temp) # keep rtl code, remove list_condition
-                match_condition = 0
-                
-                condition_array = first_element.replace('$', ' ').strip().split() # remove $, split into array
-                if '$GenPStrbIndex' in line_temp: # sample line got $GenPStrbIndex -> need to clone
-                  line_temp_total = ''
-                  for strobe_cnt in range (0, len([*RegSpec[spec_sheet][reg_key]['Common_Config']['RW_Property']])):
-                    strobe_key = [*RegSpec[spec_sheet][reg_key]['Common_Config']['RW_Property']][strobe_cnt]
-                    line_temp_each = line_temp
-                    line_temp_each = line_temp_each.replace('$GenPStrbIndex', str(strobe_cnt)) # clone strobe line from sample line
-                    for condition in condition_array:
-                      if condition in RegSpec[spec_sheet][reg_key]['Common_Config']['RW_Property'][strobe_key]:
-                        line_temp_total += line_temp_each # strobe line match condition to print out
-                        break
-                  if line_temp_total != '':
-                    line_temp = line_temp_total # replace sample line after check each strobe
-                    print_flag = 1  
-                else:
-                  for condition in condition_array: # check all RW property
-                    for strobe_cnt in range (0, len([*RegSpec[spec_sheet][reg_key]['Common_Config']['RW_Property']])):
-                      strobe_key = [*RegSpec[spec_sheet][reg_key]['Common_Config']['RW_Property']][strobe_cnt]
-                      if condition in RegSpec[spec_sheet][reg_key]['Common_Config']['RW_Property'][strobe_key]:
-                        match_condition = 1
-                        break
-                    if match_condition == 1:
-                      print_flag = 1
-                      break
-              else:
-                print_flag == 1
-                
-              if print_flag == 1:
-                if '$GenRegName' in line_temp:
-                  line_temp = line_temp.replace('$GenRegName', RegSpec[spec_sheet][reg_key]['Common_Config']['GenRegName'])
-                if '$Gen' in line_temp: # has normal variables to be replaced
-                  line_temp = normal_variables_replace(line_temp)
-                line_print += line_temp
+            line_print = process_loop(1, lines_temp, line_print)
         loop_flag = 0
         continue
       else:
-        loop_block.write(line) # store line in loop_block
+        loop_block.write(line.replace('  ', '', 1)) # store line in loop_block, remove 2 space at the beginning
         continue
     else:
       if '$GenStartLoop$GenRegName$GenRegField$GenPartialBitRange' in line:
@@ -280,10 +226,14 @@ for spec_cnt in range(1, len([*RegSpec])):
         if '$Gen' in first_element: # first element is normal condition for gen or not gen
           condition = re.escape(first_element) # backslash: $first_element -> \$first_element
           line = re.sub(condition, "", line) # keep rtl code, remove condition
+          line = line.replace(' ', '', 1) # remove 1 space at the  beginning
           
           condition = condition.replace('\$','')
           if RegSpec[spec_sheet]['Common_Config'][condition] == "0": # condition = 0, not gen
             continue
+        if '$GenRDataOR' in line:
+          GenRDataOR = " | ".join(RegSpec[spec_sheet]['Common_Config']['GenRDataOR'])
+          line = line.replace('$GenRDataOR', GenRDataOR)
         if '$Gen' in line: # has normal variables to be replaced
           line = normal_variables_replace(line)
     line_print += line
