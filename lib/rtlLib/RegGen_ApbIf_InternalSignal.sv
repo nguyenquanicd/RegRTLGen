@@ -48,5 +48,3 @@ $GenStartLoop$GenRegName$GenRegField$GenPartialBitRange
   //
   logic [REGGEN_STRB_WIDTH-1:0] $GenRegName_$GenRegField_rvalue;
 $GenEndLoop
-
-
