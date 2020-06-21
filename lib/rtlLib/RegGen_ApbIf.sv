@@ -192,7 +192,7 @@ module $GenModuleName
   //Read data
   $GenStartLoop$GenRegName$GenRegField$GenPartialBitRange
     $GenNOT$WO$WO1$WO0$WOC$WOS assign $GenRegName_$GenRegField_rvalue[$GenPartialBitRange] = $GenRegName_read_en? $GenRegName_reg[$GenPartialBitRange]: '0;
-    $WO$WO1$WO0$WOC$WOS assign $GenRegName_$GenRegField_rvalue[$GenPartialBitRange] = '0;
+    $RESERVED$WO$WO1$WO0$WOC$WOS assign $GenRegName_$GenRegField_rvalue[$GenPartialBitRange] = '0;
   $GenEndLoop
   //
   $GenStartLoop$GenRegName
