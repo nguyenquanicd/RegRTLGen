@@ -28,6 +28,22 @@ module $GenModuleName
     localparam int REGGEN_STRB_WIDTH = REGGEN_DATA_WIDTH/8
   )
   (
+    //User interface is synchronized to reg_clk
+    $GenWProtParam input  logic write_protect_en,
+    $GenStartLoop$GenRegName
+      $POW$POW0$POW1 output logic $GenRegName_write_en,
+      $POR output logic $GenRegName_read_en,
+      $POW$POW0$POW1 output logic [REGGEN_STRB_WIDTH-1:0] $GenRegName_byte_we,
+      $RWI$RO$ROC$ROS input  logic [REGGEN_STRB_WIDTH-1:0] $GenRegName_ivalue,
+    $GenEndLoop
+    $GenStartLoop$GenRegName$GenRegField
+      $RWI$RO$ROC$ROS input  logic $GenRegName_$GenRegField_iwe,
+      $RW$RWI$RW_RC$RW_RS$RW_WC$RW_WS$RW_W1C$RW_W0S$RW_W1S$RW_W0S$WO$WOC$WOS$WO0$WO1 output logic [REGGEN_DATA_WIDTH-1:0] $GenRegName_$GenRegField_reg,
+    $GenEndLoop
+    $GenStartLoop$GenRegName$GenRegField$GenPartialBitRange
+      $POW1 output logic $GenRegName_$GenRegField_$GenPStrbIndex_w1,
+      $POW0 output logic $GenRegName_$GenRegField_$GenPStrbIndex_w0,
+    $GenEndLoop
     //Clock and reset
     input  logic reg_clk,   //User clock
     input  logic reg_rst_n, //User reset is synchronized to reg_clk
@@ -43,24 +59,9 @@ module $GenModuleName
     input  logic [2:0] pprot,
     output logic pready,
     output logic pslverr,
-    output logic [REGGEN_DATA_WIDTH-1:0] prdata,
-    //User interface is synchronized to reg_clk
-    $GenWProtParam input  logic write_protect_en,
-    $GenStartLoop$GenRegName
-      $POW$POW0$POW1 output logic $GenRegName_write_en,
-      $POR output logic $GenRegName_read_en,
-      $POW$POW0$POW1 output logic [REGGEN_STRB_WIDTH-1:0] $GenRegName_byte_we,
-    $GenEndLoop
-    $GenStartLoop$GenRegName$GenRegField
-      $RWI$RO$ROC$ROS input  logic [$GenFullBitRange] $GenRegName_$GenRegField_ivalue,
-      $RWI$RO$ROC$ROS input  logic $GenRegName_$GenRegField_iwe,
-      $RW$RWI$RW_RC$RW_RS$RW_WC$RW_WS$RW_W1C$RW_W0S$RW_W1S$RW_W0S$WO$WOC$WOS$WO0$WO1 output logic [REGGEN_DATA_WIDTH-1:0] $GenRegName_$GenRegField_reg,
-    $GenEndLoop
-    $GenStartLoop$GenRegName$GenRegField$GenPartialBitRange
-      $POW1 output logic $GenRegName_$GenRegField_$GenPStrbIndex_w1,
-      $POW0 output logic $GenRegName_$GenRegField_$GenPStrbIndex_w0,
-    $GenEndLoop
+    output logic [REGGEN_DATA_WIDTH-1:0] prdata
   );
+  logic setup_phase;
   //pclk
   assign setup_phase = psel & ~penable;
   //Synchronizer
@@ -159,24 +160,24 @@ module $GenModuleName
     //APB Write
     $RW$RWI$RW_RC$RW_RS$WO assign $GenRegName_next[$GenPartialBitRange] = $GenRegName_byte_we[$GenPStrbIndex]? pwdata[$GenPartialBitRange]: $GenRegName_sc_value[$GenPartialBitRange];
     //Write to set
-    $RW_WS$RW_W1S$RW_W0S$WO1$ROS assign $GenRegName_sc_value[$GenPartialBitRange] = $GenRegName_$GenRegField_$GenPStrbIndex_set? '1: $GenRegName_$GenRegField_ivalue[$GenPartialBitRange];
+    $RW_WS$RW_W1S$RW_W0S$WO1$ROS assign $GenRegName_sc_value[$GenPartialBitRange] = $GenRegName_$GenRegField_$GenPStrbIndex_set? '1: $GenRegName_ivalue[$GenPartialBitRange];
     $RW_WS assign $GenRegName_$GenRegField_$GenPStrbIndex_set = $GenRegName_byte_we[$GenPStrbIndex];
     $RW_W1S$WO1 assign $GenRegName_$GenRegField_$GenPStrbIndex_w1 = $GenRegName_byte_we[$GenPStrbIndex] & (&pwdata[$GenPartialBitRange]);
     $RW_W1S$WO1 assign $GenRegName_$GenRegField_$GenPStrbIndex_set = $GenRegName_$GenRegField_$GenPStrbIndex_w1;
     $RW_W0S assign $GenRegName_$GenRegField_$GenPStrbIndex_set = $GenRegName_byte_we[$GenPStrbIndex] & (~|pwdata[$GenPartialBitRange]);
     $ROS assign $GenRegName_$GenRegField_$GenPStrbIndex_set = $GenRegName_read_en;
     //Write to clear
-    $RW_WC$RW_W1C$RW_W0C$WO0$ROC assign $GenRegName_sc_value[$GenPartialBitRange] = $GenRegName_$GenRegField_$GenPStrbIndex_clr? '0: $GenRegName_$GenRegField_ivalue[$GenPartialBitRange];
+    $RW_WC$RW_W1C$RW_W0C$WO0$ROC assign $GenRegName_sc_value[$GenPartialBitRange] = $GenRegName_$GenRegField_$GenPStrbIndex_clr? '0: $GenRegName_ivalue[$GenPartialBitRange];
     $RW_WC assign $GenRegName_$GenRegField_$GenPStrbIndex_clr = $GenRegName_byte_we[$GenPStrbIndex];
     $RW_W1C assign $GenRegName_$GenRegField_$GenPStrbIndex_clr = $GenRegName_byte_we[$GenPStrbIndex] & (&pwdata[$GenPartialBitRange]);
     $RW_W0C$WO0 assign $GenRegName_$GenRegField_$GenPStrbIndex_w0 = $GenRegName_byte_we[$GenPStrbIndex] & (~|pwdata[$GenPartialBitRange]);
     $RW_W0C$WO0 $GenRegName_$GenRegField_$GenPStrbIndex_clr = $GenRegName_$GenRegField_$GenPStrbIndex_w0;
     $ROC assign $GenRegName_$GenRegField_$GenPStrbIndex_clr = $GenRegName_read_en;
     //
-    $GenNOT$RW_WS$RW_W1S$RW_W0S$WO1$ROS$RW_WC$RW_W1C$RW_W0C$WO0$ROC assign $GenRegName_sc_value[$GenPartialBitRange] = $GenRegName_$GenRegField_ivalue[$GenPartialBitRange];
+    $GenNOT$RW_WS$RW_W1S$RW_W0S$WO1$ROS$RW_WC$RW_W1C$RW_W0C$WO0$ROC assign $GenRegName_sc_value[$GenPartialBitRange] = $GenRegName_ivalue[$GenPartialBitRange];
     //Write from internal operation
-    $RWI$RO$ROC$ROS assign $GenRegName_$GenRegField_ivalue[$GenPartialBitRange] = $GenRegName_$GenRegField_iwe? $GenRegName_$GenRegField_ivalue[$GenPartialBitRange]: $GenRegName_reg[$GenPartialBitRange];
-    $GenNOT$RWI$RO$ROC$ROS assign $GenRegName_$GenRegField_ivalue[$GenPartialBitRange] = $GenRegName_reg[$GenPartialBitRange];
+    $RWI$RO$ROC$ROS assign $GenRegName_ivalue[$GenPartialBitRange] = $GenRegName_$GenRegField_iwe? $GenRegName_ivalue[$GenPartialBitRange]: $GenRegName_reg[$GenPartialBitRange];
+    $GenNOT$RWI$RO$ROC$ROS assign $GenRegName_ivalue[$GenPartialBitRange] = $GenRegName_reg[$GenPartialBitRange];
   $GenEndLoop
   //
   $GenStartLoop$GenRegName$GenRegField$GenPartialBitRange
