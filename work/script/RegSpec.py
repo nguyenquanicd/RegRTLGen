@@ -23,7 +23,7 @@ RegSpec['RegSpec_Org']['Register_No_1'] = {}
 RegSpec['RegSpec_Org']['Register_No_1']['Common_Config'] = {}
 RegSpec['RegSpec_Org']['Register_No_1']['Common_Config']['GenRegName'] = "ACTRL"
 RegSpec['RegSpec_Org']['Register_No_1']['Common_Config']['Register_Description'] = "A control register"
-RegSpec['RegSpec_Org']['Register_No_1']['Common_Config']['Initial_Value'] = "16'h0000"
+RegSpec['RegSpec_Org']['Register_No_1']['Common_Config']['Register_Address'] = "16'h0000"
 RegSpec['RegSpec_Org']['Common_Config']['GenRDataOR'].append("ACTRL_rvalue")
 RegSpec['RegSpec_Org']['Register_No_1']['Common_Config']['RW_Property'] = {}
 RegSpec['RegSpec_Org']['Register_No_1']['Common_Config']['RW_Property']['Strobe_0'] = []
@@ -262,7 +262,7 @@ RegSpec['RegSpec_Org']['Register_No_2'] = {}
 RegSpec['RegSpec_Org']['Register_No_2']['Common_Config'] = {}
 RegSpec['RegSpec_Org']['Register_No_2']['Common_Config']['GenRegName'] = "BCTRL"
 RegSpec['RegSpec_Org']['Register_No_2']['Common_Config']['Register_Description'] = "B control register"
-RegSpec['RegSpec_Org']['Register_No_2']['Common_Config']['Initial_Value'] = "16'h0000"
+RegSpec['RegSpec_Org']['Register_No_2']['Common_Config']['Register_Address'] = "16'h0000"
 RegSpec['RegSpec_Org']['Common_Config']['GenRDataOR'].append("BCTRL_rvalue")
 RegSpec['RegSpec_Org']['Register_No_2']['Common_Config']['RW_Property'] = {}
 RegSpec['RegSpec_Org']['Register_No_2']['Common_Config']['RW_Property']['Strobe_0'] = []

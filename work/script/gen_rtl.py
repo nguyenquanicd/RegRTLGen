@@ -27,10 +27,10 @@ def normal_variables_replace(line):
       line = re.sub(chosen_variable, RegSpec[spec_sheet]['Common_Config'][variable], line)
   return line
 
-def process_loop (loop_type, lines_temp, line_print):
+def process_loop (loop_type, lines_temp, line_print, reg_key, field_key, split_key):
   for line_temp in lines_temp:
     print_flag = 0
-    first_element = line_temp.split()[0] # get first element of line_temp
+    first_element = line_temp.split()[0] if '$' in line_temp else "" # get first element of line_temp
     if '$GenNOT' in first_element:
       print_flag = 1 # default is print, met condition to not print
       first_element = first_element.replace('$GenNOT', '') # remove $GenNOT
@@ -72,31 +72,34 @@ def process_loop (loop_type, lines_temp, line_print):
               print_flag = 0
               break
       else:
-        if loop_type == 2:
-          condition_check = RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['RW_Property']
-        elif loop_type == 3:
-          condition_check = RegSpec[spec_sheet][reg_key][field_key][split_key]['RW_Property']
-        for condition in condition_array: # check all RW property
-          if condition in condition_check:
-            match_condition = 1
-            print_flag = 0
-            break
-    elif '$Gen' in first_element: # first element is normal condition for gen or not gen
+        if RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['GenRegField'] == 'RESERVED':
+          print_flag = 0 # skip if RESERVED
+        else:
+          if loop_type == 2:
+            condition_check = RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['RW_Property']
+          elif loop_type == 3:
+            condition_check = RegSpec[spec_sheet][reg_key][field_key][split_key]['RW_Property']
+          for condition in condition_array: # check all RW property
+            if condition in condition_check:
+              print_flag = 0
+              break
+    elif '$Gen' in first_element: 
       line_temp_backup = line_temp
-      
       condition = re.escape(first_element) # backslash: $first_element -> \$first_element
       line_temp = re.sub(condition, "", line_temp) # keep rtl code, remove condition
       
       condition = condition.replace('\$','')     
-      if condition in normal_conditions:
+      if condition in normal_conditions: # first element is normal condition for gen or not gen
         if RegSpec[spec_sheet]['Common_Config'][condition] == "0": # condition = 0, not gen
           continue
         else:
           line_temp = line_temp.replace(' ', '', 1) # remove 1 space at the  beginning
-          print_flag = 1
+          #print_flag = 1
+          print_flag = 1 if RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['GenRegField'] != 'RESERVED' else 0
       else:
         line_temp = line_temp_backup
-        print_flag = 1
+        #print_flag = 1
+        print_flag = 1 if RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['GenRegField'] != 'RESERVED' else 0
     elif '$' in first_element:
       list_condition = re.escape(first_element) # backslash: $first_element -> \$first_element
       line_temp = re.sub(list_condition, "", line_temp) # keep rtl code, remove list_condition
@@ -129,17 +132,23 @@ def process_loop (loop_type, lines_temp, line_print):
               print_flag = 1
               break
       else:
-        if loop_type == 2:
-          condition_check = RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['RW_Property']
-        elif loop_type == 3:
-          condition_check = RegSpec[spec_sheet][reg_key][field_key][split_key]['RW_Property']
-        for condition in condition_array: # check all RW property
-          if condition in condition_check:
-            match_condition = 1
-            print_flag = 1
-            break
-    else:
-      print_flag = 1
+        if RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['GenRegField'] == 'RESERVED':
+          print_flag = 1 if 'RESERVED' in condition_array else 0
+        else:
+          if loop_type == 2:
+            condition_check = RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['RW_Property']
+          elif loop_type == 3:
+            condition_check = RegSpec[spec_sheet][reg_key][field_key][split_key]['RW_Property']
+          for condition in condition_array: # check all RW property
+            if condition in condition_check:
+              print_flag = 1
+              break
+    else:          
+      if loop_type == 1:
+        print_flag = 1
+      else:
+        #print_flag = 1
+        print_flag = 1 if RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['GenRegField'] != 'RESERVED' else 0
       
     if print_flag == 1:
       if '$GenRegName' in line_temp:
@@ -162,19 +171,7 @@ def process_loop (loop_type, lines_temp, line_print):
       line_print += line_temp
   return line_print
   
-## Main process
-line_print = ''
-for spec_cnt in range(1, len([*RegSpec])):
-  # prepare output RTL
-  spec_sheet = [*RegSpec][spec_cnt]
-  output_path = script_path + "/../../output/" + RegSpec[spec_sheet]['Common_Config']['GenModuleName'] + ".sv"
-  rtl_output = open(output_path, "w")
-  
-  # read sample RTL
-  sample_path = script_path + "/../../lib/rtlLib/RegGen_ApbIf.sv"
-  rtl_sample = open(sample_path, "r")
-  lines = rtl_sample.readlines()
-  
+def process_print (process_type, lines, line_print, line_internal_print):
   loop_flag = 0
   for line in lines:
     if loop_flag != 0:
@@ -190,17 +187,17 @@ for spec_cnt in range(1, len([*RegSpec])):
               field_key = [*RegSpec[spec_sheet][reg_key]][field_cnt]
               for split_cnt in range(1, len([*RegSpec[spec_sheet][reg_key][field_key]])):
                 split_key = [*RegSpec[spec_sheet][reg_key][field_key]][split_cnt]
-                line_print = process_loop(3, lines_temp, line_print)
+                line_print = process_loop(3, lines_temp, line_print, reg_key, field_key, split_key)
         elif loop_flag == 2:
           for reg_cnt in range(1, len([*RegSpec[spec_sheet]])):
             reg_key = [*RegSpec[spec_sheet]][reg_cnt]
             for field_cnt in range(1, len([*RegSpec[spec_sheet][reg_key]])):
               field_key = [*RegSpec[spec_sheet][reg_key]][field_cnt]
-              line_print = process_loop(2, lines_temp, line_print)
+              line_print = process_loop(2, lines_temp, line_print, reg_key, field_key, "")
         elif loop_flag == 1:
           for reg_cnt in range(1, len([*RegSpec[spec_sheet]])):
             reg_key = [*RegSpec[spec_sheet]][reg_cnt]
-            line_print = process_loop(1, lines_temp, line_print)
+            line_print = process_loop(1, lines_temp, line_print, reg_key, "", "")
         loop_flag = 0
         continue
       else:
@@ -211,33 +208,63 @@ for spec_cnt in range(1, len([*RegSpec])):
         loop_flag = 3
         loop_block = open("loop_block_temp", "w")
         continue
-      if '$GenStartLoop$GenRegName$GenRegField' in line:
+      elif '$GenStartLoop$GenRegName$GenRegField' in line:
         loop_flag = 2
         loop_block = open("loop_block_temp", "w")
         continue
-      if '$GenStartLoop$GenRegName' in line:
+      elif '$GenStartLoop$GenRegName' in line:
         loop_flag = 1
         loop_block = open("loop_block_temp", "w")
         continue
-      elif '$GenUserHeader' in line:
-        line = line.replace('$GenUserHeader', RegSpec['GenUserHeader'])
-      else: # normal line
-        first_element = line.split()[0] # get first element of line
-        if '$Gen' in first_element: # first element is normal condition for gen or not gen
-          condition = re.escape(first_element) # backslash: $first_element -> \$first_element
-          line = re.sub(condition, "", line) # keep rtl code, remove condition
-          line = line.replace(' ', '', 1) # remove 1 space at the  beginning
-          
-          condition = condition.replace('\$','')
-          if RegSpec[spec_sheet]['Common_Config'][condition] == "0": # condition = 0, not gen
-            continue
-        if '$GenRDataOR' in line:
-          GenRDataOR = " | ".join(RegSpec[spec_sheet]['Common_Config']['GenRDataOR'])
-          line = line.replace('$GenRDataOR', GenRDataOR)
-        if '$Gen' in line: # has normal variables to be replaced
+      elif process_type == "top":
+        if '$GenUserHeader' in line:
+          line = line.replace('$GenUserHeader', RegSpec['GenUserHeader'])
+        elif '$GenInternalSignal' in line:
+          line_print += line_internal_print
+          continue
+        elif '$Gen' in line: # line has condition/normal variables
+          first_element = line.split()[0] # get first element of line
+          if '$Gen' in first_element: # first element is normal condition for gen or not gen
+            condition = re.escape(first_element) # backslash: $first_element -> \$first_element
+            line = re.sub(condition, "", line) # keep rtl code, remove condition
+            line = line.replace(' ', '', 1) # remove 1 space at the  beginning
+            
+            condition = condition.replace('\$','')
+            if RegSpec[spec_sheet]['Common_Config'][condition] == "0": # condition = 0, not gen
+              continue
+          if '$GenRDataOR' in line:
+            GenRDataOR = " | ".join(RegSpec[spec_sheet]['Common_Config']['GenRDataOR'])
+            line = line.replace('$GenRDataOR', GenRDataOR)
+          if '$Gen' in line: # remain variables after check condition
+            line = normal_variables_replace(line)
+      else:
+        if '$Gen' in line:
           line = normal_variables_replace(line)
+
     line_print += line
-rtl_output.write(line_print) # write all content to output RTL
+  return line_print
+  
+## Main process
+for spec_cnt in range(1, len([*RegSpec])):
+  # prepare output RTL
+  spec_sheet = [*RegSpec][spec_cnt]
+  output_path = script_path + "/../../output/" + RegSpec[spec_sheet]['Common_Config']['GenModuleName'] + ".sv"
+  rtl_output = open(output_path, "w")
+  
+  # read sample InternalSignal RTL
+  sample_path = script_path + "/../../lib/rtlLib/RegGen_ApbIf_InternalSignal.sv"
+  rtl_sample = open(sample_path, "r")
+  lines = rtl_sample.readlines()
+  line_internal_print = process_print ("internal", lines, '', '')
+
+  # read sample RTL
+  sample_path = script_path + "/../../lib/rtlLib/RegGen_ApbIf.sv"
+  rtl_sample = open(sample_path, "r")
+  lines = rtl_sample.readlines()
+  line_print = process_print ("top", lines, '', line_internal_print)
+  
+  rtl_output.write(line_print) # write all content to output RTL
+  rtl_output.close()
 
 # finish
 os.remove('loop_block_temp')

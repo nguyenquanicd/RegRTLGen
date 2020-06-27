@@ -17,7 +17,8 @@ sys.path.append(lib_path)
 # remove old log
 if os.path.exists("Error.log"):
   os.remove("Error.log")
-
+if os.path.exists('finish_all'):
+  os.remove("finish_all")
 # progress bar
 command = script_path + "/script/progress_bar.py"
 subprocess.Popen(command, shell=True)
@@ -29,11 +30,15 @@ subprocess.call(command, shell=True)
 
 # generate RegRTL
 command = script_path + "/script/gen_rtl.py " + "RegSpec.py"
-subprocess.call(command, shell=True)
+subprocess.Popen(command, shell=True)
 
-## create html specification
-#command = script_path + "/script/gen_html.py " + "RegSpec.py"
-#subprocess.call(command, shell=True)
+# create html specification
+command = script_path + "/script/gen_html.py " + "RegSpec.py"
+subprocess.Popen(command, shell=True)
 
-# done
-time.sleep(2)
+# finish
+while (not os.path.exists("finish_all")):
+  time.sleep(1)
+os.remove("finish_all")
+
+print ("\n\tCongratulation! Mission completed!")

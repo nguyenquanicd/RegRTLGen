@@ -1,0 +1,51 @@
+<html>
+<body>
+Register list of module: ExampleCsr
+<table border="1">
+<tr><td>name<td>offset<td>reset
+<tr><td>ACTRL<td>16'h0000<td>T.B.D
+<tr><td>BCTRL<td>16'h0000<td>T.B.D
+</table>
+<p>
+ACTRL offset:16'h0000 reset:T.B.D<br>
+ A control register<br>
+<table border="1">
+<tr><td>bit<td>reset<td>description
+<tr><td>31:28<td>4'd0<td>Reserved
+Read as zeros
+<tr><td>27:24<td>4'b0000<td>Baud rate 1
+<tr><td>23:16<td>8'hff<td>Baud rate 1
+<tr><td>15:10<td>6'd0<td>Baud rate 0
+<tr><td>9<td>1'b0<td>Test RW_W0S
+<tr><td>8<td>1'b0<td>Test RW_W1S
+<tr><td>7<td>1'b0<td>Test RW_W0C
+<tr><td>6<td>1'b0<td>Test RW_W1C
+<tr><td>5<td>1'b0<td>Test RW_WS
+<tr><td>4<td>1'b0<td>Test RW_WC
+<tr><td>3<td>1'b0<td>Test RW_RS
+<tr><td>2<td>1'b0<td>Test RW_RC
+<tr><td>1<td>1'b0<td>Test RWI
+<tr><td>0<td>1'b0<td>Test RW
+</table>
+<p>
+BCTRL offset:16'h0000 reset:T.B.D<br>
+ B control register<br>
+<table border="1">
+<tr><td>bit<td>reset<td>description
+<tr><td>31:28<td>4'd0<td>Reserved
+Read as zeros
+<tr><td>27:24<td>4'b0000<td>Baud rate 3
+<tr><td>23:16<td>8'hff<td>Baud rate 3
+<tr><td>15:8<td>8'd0<td>Baud rate 2
+<tr><td>7<td>1'b0<td>Test WO1
+<tr><td>6<td>1'b0<td>Test WO0
+<tr><td>5<td>1'b0<td>Test WOS
+<tr><td>4<td>1'b0<td>Test WOC
+<tr><td>3<td>1'b0<td>Test WO
+<tr><td>2<td>1'b0<td>Test ROS
+<tr><td>1<td>1'b0<td>Test ROC
+<tr><td>0<td>1'b0<td>Test RO
+</table>
+<p>
+</body>
+</html>
