@@ -5,7 +5,6 @@
   logic req_en;
   logic wprot_en_sync;
   logic [REGGEN_DATA_WIDTH-1:0] prdata_next;
-  logic [REGGEN_DATA_WIDTH-1:0] prdata;
   logic prot_error;
   logic sec_error;
   logic pslverr_nxt;
@@ -26,9 +25,9 @@
   endgenerate
   $GenStartLoop$GenRegName
     logic $GenRegName_sel;
-    logic $GenRegName_write_en;
-    logic $GenRegName_read_en;
-    logic [REGGEN_STRB_WIDTH-1:0] $GenRegName_byte_we;
+    $GenNOT$POW$POW0$POW1 logic $GenRegName_write_en;
+    $GenNOT$POR logic $GenRegName_read_en;
+    $GenNOT$POW$POW0$POW1 logic [REGGEN_STRB_WIDTH-1:0] $GenRegName_byte_we;
     logic [REGGEN_DATA_WIDTH-1:0] $GenRegName_next;
     logic [REGGEN_DATA_WIDTH-1:0] $GenRegName_reg;
     $RW_WS$RW_W1S$RW_W0S$WO1$ROS logic [REGGEN_DATA_WIDTH-1:0] $GenRegName_sc_value;

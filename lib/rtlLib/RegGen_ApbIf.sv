@@ -17,15 +17,15 @@ module $GenModuleName
     //Parameters are the fixed values and are created by tool. 
     //For this reason, they are localparams and NOT changed.
     //If you want to change the parameters, the RTL code shall be generated again.
-    localparam int REGGEN_WPROT_MODE = $GenWProtParam,
-    localparam int REGGEN_WPROT_ERR  = $GenWProtErrParam,
-    localparam int REGGEN_SEC_MODE   = $GenSecParam,
-    localparam int REGGEN_SEC_ERR    = $GenSecErrParam,
-    localparam int REGGEN_ASYNC_MODE = $GenAsyncParam,
-    localparam int REGGEN_SYNC_STAGE = $GenSyncStageParam,
-    localparam int REGGEN_ADDR_WIDTH = $GenAddrParam,
-    localparam int REGGEN_DATA_WIDTH = $GenDataParam,
-    localparam int REGGEN_STRB_WIDTH = REGGEN_DATA_WIDTH/8
+    parameter int REGGEN_WPROT_MODE = $GenWProtParam,
+    parameter int REGGEN_WPROT_ERR  = $GenWProtErrParam,
+    parameter int REGGEN_SEC_MODE   = $GenSecParam,
+    parameter int REGGEN_SEC_ERR    = $GenSecErrParam,
+    parameter int REGGEN_ASYNC_MODE = $GenAsyncParam,
+    parameter int REGGEN_SYNC_STAGE = $GenSyncStageParam,
+    parameter int REGGEN_ADDR_WIDTH = $GenAddrParam,
+    parameter int REGGEN_DATA_WIDTH = $GenDataParam,
+    parameter int REGGEN_STRB_WIDTH = REGGEN_DATA_WIDTH/8
   )
   (
     //User interface is synchronized to reg_clk
@@ -191,15 +191,12 @@ module $GenModuleName
         $GenRegName_reg[$GenPartialBitRange] <= $GenRegName_next[$GenPartialBitRange];
     end
   $GenEndLoop
-  //Read data
+  //Read data - related to field (GenRegField) and strobe (GenPartialBitRange)
   $GenStartLoop$GenRegName$GenRegField$GenPartialBitRange
-    $GenNOT$WO$WO1$WO0$WOC$WOS assign $GenRegName_$GenRegField_rvalue[$GenPartialBitRange] = $GenRegName_read_en? $GenRegName_reg[$GenPartialBitRange]: '0;
-    $RESERVED$WO$WO1$WO0$WOC$WOS assign $GenRegName_$GenRegField_rvalue[$GenPartialBitRange] = '0;
+    $GenNOT$WO$WO1$WO0$WOC$WOS assign $GenRegName_rvalue[$GenPartialBitRange] = $GenRegName_read_en? $GenRegName_reg[$GenPartialBitRange]: '0;
+    $RESERVED$WO$WO1$WO0$WOC$WOS assign $GenRegName_rvalue[$GenPartialBitRange] = '0;
   $GenEndLoop
   //
-  $GenStartLoop$GenRegName
-    assign $GenRegName_rvalue = {REGGEN_DATA_WIDTH{$GenRegName_read_en}} & $GenRegName_reg;
-  $GenEndLoop
   assign prdata_next = $GenRDataOR;
   //
   always_ff @ (posedge reg_clk) begin
