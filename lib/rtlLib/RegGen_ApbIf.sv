@@ -162,9 +162,7 @@ module $GenModuleName
   //Use the bit range, GenPartialBitRange, to select the strobe index, GenPStrbIndex
   //---------------------------------------
   $GenStartLoop$GenRegName$GenRegField$GenPartialBitRange
-    //Reg  : $GenRegName
-    //Field: $GenRegField
-    //Bit  : $GenPartialBitRange
+    //Reg  : $GenRegName[$GenPartialBitRange] $GenRegField 
     //APB Write
     $GenNOT$RO$ROS$ROC$RWI assign $GenRegName_next[$GenPartialBitRange] = $GenRegName_byte_we[$GenPStrbIndex]? pwdata[$GenPartialBitRange]: $GenRegName_sc_value[$GenPartialBitRange];
     $RESERVED$RO$ROS$ROC$RWI assign $GenRegName_next[$GenPartialBitRange] = $GenRegName_sc_value[$GenPartialBitRange];
