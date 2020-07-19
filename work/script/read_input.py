@@ -199,13 +199,13 @@ for sheet in workbook:
           # new RegSpec['RegSpec_*']['<register>']['Common_Config']
           content += "RegSpec['%s']['%s']['Common_Config'] = {}\n" % (sheet.title, register_name)
           
-          # GenRegName, Register_Description & Register_Address
+          # GenRegName, Register_Description & GenRegOffsetParam
           GenRegName           = row[2].value
           Register_Description = row[3].value
-          Register_Address     = row[4].value
+          GenRegOffsetParam     = row[4].value
           content += "RegSpec['%s']['%s']['Common_Config']['%s'] = \"%s\"\n" % (sheet.title, register_name, 'GenRegName',           GenRegName)
           content += "RegSpec['%s']['%s']['Common_Config']['%s'] = \"%s\"\n" % (sheet.title, register_name, 'Register_Description', Register_Description)
-          content += "RegSpec['%s']['%s']['Common_Config']['%s'] = \"%s\"\n" % (sheet.title, register_name, 'Register_Address',     Register_Address)
+          content += "RegSpec['%s']['%s']['Common_Config']['%s'] = \"%s\"\n" % (sheet.title, register_name, 'GenRegOffsetParam',     GenRegOffsetParam)
           
           # add for GenRDataOR
           content += "RegSpec['%s']['Common_Config']['GenRDataOR'].append(\"%s_rvalue\")\n" % (sheet.title, GenRegName)

@@ -72,17 +72,17 @@ def process_loop (loop_type, lines_temp, line_print, reg_key, field_key, split_k
               print_flag = 0
               break
       else:
-        if RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['GenRegField'] == 'RESERVED':
-          print_flag = 0 # skip if RESERVED
-        else:
-          if loop_type == 2:
-            condition_check = RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['RW_Property']
-          elif loop_type == 3:
-            condition_check = RegSpec[spec_sheet][reg_key][field_key][split_key]['RW_Property']
-          for condition in condition_array: # check all RW property
-            if condition in condition_check:
-              print_flag = 0
-              break
+        #if RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['GenRegField'] == 'RESERVED':
+        #  print_flag = 0 # skip if RESERVED
+        #else:
+        if loop_type == 2:
+          condition_check = RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['RW_Property']
+        elif loop_type == 3:
+          condition_check = RegSpec[spec_sheet][reg_key][field_key][split_key]['RW_Property']
+        for condition in condition_array: # check all RW property
+          if condition in condition_check:
+            print_flag = 0
+            break
     elif '$Gen' in first_element: 
       line_temp_backup = line_temp
       condition = re.escape(first_element) # backslash: $first_element -> \$first_element
@@ -94,12 +94,12 @@ def process_loop (loop_type, lines_temp, line_print, reg_key, field_key, split_k
           continue
         else:
           line_temp = line_temp.replace(' ', '', 1) # remove 1 space at the  beginning
-          #print_flag = 1
-          print_flag = 1 if RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['GenRegField'] != 'RESERVED' else 0
+          print_flag = 1
+          #print_flag = 1 if RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['GenRegField'] != 'RESERVED' else 0
       else:
         line_temp = line_temp_backup
-        #print_flag = 1
-        print_flag = 1 if RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['GenRegField'] != 'RESERVED' else 0
+        print_flag = 1
+        #print_flag = 1 if RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['GenRegField'] != 'RESERVED' else 0
     elif '$' in first_element:
       list_condition = re.escape(first_element) # backslash: $first_element -> \$first_element
       line_temp = re.sub(list_condition, "", line_temp) # keep rtl code, remove list_condition
@@ -147,14 +147,16 @@ def process_loop (loop_type, lines_temp, line_print, reg_key, field_key, split_k
       if loop_type == 1:
         print_flag = 1
       else:
-        #print_flag = 1
-        print_flag = 1 if RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['GenRegField'] != 'RESERVED' else 0
+        print_flag = 1
+        #print_flag = 1 if RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['GenRegField'] != 'RESERVED' else 0
       
     if print_flag == 1:
       if '$GenRegName' in line_temp:
         line_temp = line_temp.replace('$GenRegName', RegSpec[spec_sheet][reg_key]['Common_Config']['GenRegName'])
       if '$GenRegField' in line_temp:
         line_temp = line_temp.replace('$GenRegField', RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['GenRegField'])
+      if '$GenRegOffsetParam' in line_temp:
+        line_temp = line_temp.replace('$GenRegOffsetParam', RegSpec[spec_sheet][reg_key]['Common_Config']['GenRegOffsetParam'])
       if '$GenFullBitRange' in line_temp:
         bit_max = int(max(RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['Ful_BitRange']))
         bit_min = int(min(RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['Ful_BitRange']))

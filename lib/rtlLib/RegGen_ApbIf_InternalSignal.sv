@@ -8,28 +8,14 @@
   logic prot_error;
   logic sec_error;
   logic pslverr_nxt;
-  //Synchronizer
-  generate
-    if (REGGEN_ASYNC_MODE == 1) begin: AsyncMode
-      logic req_inv;
-      logic reg_in;
-      logic req_sync;
-      logic ack_in;
-      logic ack_sync;
-      logic ack_en;
-      logic clr_pready;
-      if (REGGEN_WPROT_MODE == 1) begin: AsyncWProt
-          logic [REGGEN_SYNC_STAGE-1:0] wprot_sync;
-      end
-    end
-  endgenerate
   $GenStartLoop$GenRegName
     logic $GenRegName_sel;
-    $GenNOT$POW$POW0$POW1 logic $GenRegName_write_en;
+    $RW$RW_RC$RW_RS$RW_WC$RW_WS$RW_W1C$RW_W0S$RW_W1S$RW_W0S$WO$WOC$WOS$WO0$WO1 logic $GenRegName_write_en;
     $GenNOT$POR logic $GenRegName_read_en;
     $GenNOT$POW$POW0$POW1 logic [REGGEN_STRB_WIDTH-1:0] $GenRegName_byte_we;
     logic [REGGEN_DATA_WIDTH-1:0] $GenRegName_next;
-    logic [REGGEN_DATA_WIDTH-1:0] $GenRegName_reg;
+    $GenNOT$RW$RWI$RW_RC$RW_RS$RW_WC$RW_WS$RW_W1C$RW_W0S$RW_W1S$RW_W0S$WO$WOC$WOS$WO0$WO1 logic [REGGEN_DATA_WIDTH-1:0] $GenRegName_reg;
+    logic [REGGEN_DATA_WIDTH-1:0] $GenRegName_ivalue_next;
     $RW_WS$RW_W1S$RW_W0S$WO1$ROS logic [REGGEN_DATA_WIDTH-1:0] $GenRegName_sc_value;
     logic [REGGEN_DATA_WIDTH-1:0] $GenRegName_rvalue;
   $GenEndLoop
@@ -45,10 +31,5 @@
     $RW_W0C$WO0 logic $GenRegName_$GenRegField_$GenPStrbIndex_w0;
     $RW_W0C$WO0 logic $GenRegName_$GenRegField_$GenPStrbIndex_clr;
     $ROC logic $GenRegName_$GenRegField_$GenPStrbIndex_clr;
-  $GenEndLoop
-  //
-  $GenStartLoop$GenRegName$GenRegField
-    logic [REGGEN_STRB_WIDTH-1:0] $GenRegName_$GenRegField_rvalue;
-    $RESERVED logic [REGGEN_STRB_WIDTH-1:0] $GenRegName_$GenRegField_rvalue;
   $GenEndLoop
   //// End-Define Internal signals

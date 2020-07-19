@@ -17,6 +17,11 @@ module $GenModuleName
     //Parameters are the fixed values and are created by tool. 
     //For this reason, they are localparams and NOT changed.
     //If you want to change the parameters, the RTL code shall be generated again.
+    //
+    $GenStartLoop$GenRegName
+      parameter int REGGEN_OFFSET_ADDR_$GenRegName = $GenRegOffsetParam,
+    $GenEndLoop
+    //
     parameter int REGGEN_WPROT_MODE = $GenWProtParam,
     parameter int REGGEN_WPROT_ERR  = $GenWProtErrParam,
     parameter int REGGEN_SEC_MODE   = $GenSecParam,
@@ -31,14 +36,13 @@ module $GenModuleName
     //User interface is synchronized to reg_clk
     $GenWProtParam input  logic write_protect_en,
     $GenStartLoop$GenRegName
-      $POW$POW0$POW1 output logic $GenRegName_write_en,
       $POR output logic $GenRegName_read_en,
       $POW$POW0$POW1 output logic [REGGEN_STRB_WIDTH-1:0] $GenRegName_byte_we,
-      $RWI$RO$ROC$ROS input  logic [REGGEN_STRB_WIDTH-1:0] $GenRegName_ivalue,
+      $RWI$RO$ROC$ROS input  logic [REGGEN_DATA_WIDTH-1:0] $GenRegName_ivalue,
+      $RW$RWI$RW_RC$RW_RS$RW_WC$RW_WS$RW_W1C$RW_W0S$RW_W1S$RW_W0S$WO$WOC$WOS$WO0$WO1 output logic [REGGEN_DATA_WIDTH-1:0] $GenRegName_reg,
     $GenEndLoop
     $GenStartLoop$GenRegName$GenRegField
-      $RWI$RO$ROC$ROS input  logic $GenRegName_$GenRegField_iwe,
-      $RW$RWI$RW_RC$RW_RS$RW_WC$RW_WS$RW_W1C$RW_W0S$RW_W1S$RW_W0S$WO$WOC$WOS$WO0$WO1 output logic [REGGEN_DATA_WIDTH-1:0] $GenRegName_$GenRegField_reg,
+      $RESERVED$RWI$RO$ROC$ROS input  logic $GenRegName_$GenRegField_iwe,
     $GenEndLoop
     $GenStartLoop$GenRegName$GenRegField$GenPartialBitRange
       $POW1 output logic $GenRegName_$GenRegField_$GenPStrbIndex_w1,
@@ -67,6 +71,13 @@ module $GenModuleName
   //Synchronizer
   generate
     if (REGGEN_ASYNC_MODE == 1) begin: AsyncMode
+      logic req_inv;
+      logic req_in;
+      logic [REGGEN_SYNC_STAGE-1:0] req_sync;
+      logic ack_in;
+      logic [REGGEN_SYNC_STAGE-1:0] ack_sync;
+      logic ack_en;
+      logic clr_pready;
       //Access request
       assign req_inv = setup_phase;
       $GenAsyncReset always_ff @ (posedge pclk, negedge preset_n) begin
@@ -74,7 +85,7 @@ module $GenModuleName
         if (!preset_n)
           req_in <= '0;
         else if (req_inv)
-          reg_in <= ~req_in;
+          req_in <= ~req_in;
       end
       $GenAsyncReset always_ff @ (posedge reg_clk, negedge reg_rst_n) begin
       $GenSyncReset always_ff @ (posedge reg_clk) begin
@@ -87,7 +98,7 @@ module $GenModuleName
       //Access acknowledge
       $GenAsyncReset always_ff @ (posedge reg_clk, negedge reg_rst_n) begin
       $GenSyncReset always_ff @ (posedge reg_clk) begin
-        if (!reg_clk)
+        if (!reg_rst_n)
           ack_in <= '0;
         else if (req_inv)
           ack_in <= ~ack_in;
@@ -112,6 +123,7 @@ module $GenModuleName
       end
       //
       if (REGGEN_WPROT_MODE == 1) begin: AsyncWProt
+        logic [REGGEN_SYNC_STAGE-1:0] wprot_sync;
         $GenAsyncReset always_ff @ (posedge reg_clk, negedge reg_rst_n) begin
         $GenSyncReset always_ff @ (posedge reg_clk) begin
           if (!reg_rst_n)
@@ -128,12 +140,7 @@ module $GenModuleName
     else begin: SyncMode
       assign req_en = setup_phase;
       assign pready = 1'b1;
-      if (REGGEN_WPROT_MODE == 1) begin: SyncWProt
-        assign wprot_en_sync = write_protect_en;
-      end
-      else begin: SyncNoWProt
-        assign wprot_en_sync = 1'b0;
-      end
+      assign wprot_en_sync = (REGGEN_WPROT_MODE == 1)? write_protect_en: 1'b0;
     end
   endgenerate
   //
@@ -159,30 +166,30 @@ module $GenModuleName
     //Field: $GenRegField
     //Bit  : $GenPartialBitRange
     //APB Write
-    assign $GenRegName_next[$GenPartialBitRange] = $GenRegName_byte_we[$GenPStrbIndex]? pwdata[$GenPartialBitRange]: $GenRegName_sc_value[$GenPartialBitRange];
+    $GenNOT$RO$ROS$ROC$RWI assign $GenRegName_next[$GenPartialBitRange] = $GenRegName_byte_we[$GenPStrbIndex]? pwdata[$GenPartialBitRange]: $GenRegName_sc_value[$GenPartialBitRange];
+    $RESERVED$RO$ROS$ROC$RWI assign $GenRegName_next[$GenPartialBitRange] = $GenRegName_sc_value[$GenPartialBitRange];
     //Write to set
-    $RW_WS$RW_W1S$RW_W0S$WO1$ROS assign $GenRegName_sc_value[$GenPartialBitRange] = $GenRegName_$GenRegField_$GenPStrbIndex_set? '1: $GenRegName_ivalue[$GenPartialBitRange];
+    $RW_WS$RW_W1S$RW_W0S$WO1$ROS assign $GenRegName_sc_value[$GenPartialBitRange] = $GenRegName_$GenRegField_$GenPStrbIndex_set? '1: $GenRegName_ivalue_next[$GenPartialBitRange];
     $RW_WS assign $GenRegName_$GenRegField_$GenPStrbIndex_set = $GenRegName_byte_we[$GenPStrbIndex];
-    $RW_W1S$WO1 assign $GenRegName_$GenRegField_$GenPStrbIndex_w1 = $GenRegName_byte_we[$GenPStrbIndex] & (&pwdata[$GenPartialBitRange]);
+    $POW1$RW_W1S$WO1 assign $GenRegName_$GenRegField_$GenPStrbIndex_w1 = $GenRegName_byte_we[$GenPStrbIndex] & (&pwdata[$GenPartialBitRange]);
     $RW_W1S$WO1 assign $GenRegName_$GenRegField_$GenPStrbIndex_set = $GenRegName_$GenRegField_$GenPStrbIndex_w1;
     $RW_W0S assign $GenRegName_$GenRegField_$GenPStrbIndex_set = $GenRegName_byte_we[$GenPStrbIndex] & (~|pwdata[$GenPartialBitRange]);
     $ROS assign $GenRegName_$GenRegField_$GenPStrbIndex_set = $GenRegName_read_en;
     //Write to clear
-    $RW_WC$RW_W1C$RW_W0C$WO0$ROC assign $GenRegName_sc_value[$GenPartialBitRange] = $GenRegName_$GenRegField_$GenPStrbIndex_clr? '0: $GenRegName_ivalue[$GenPartialBitRange];
+    $RW_WC$RW_W1C$RW_W0C$WO0$ROC assign $GenRegName_sc_value[$GenPartialBitRange] = $GenRegName_$GenRegField_$GenPStrbIndex_clr? '0: $GenRegName_ivalue_next[$GenPartialBitRange];
     $RW_WC assign $GenRegName_$GenRegField_$GenPStrbIndex_clr = $GenRegName_byte_we[$GenPStrbIndex];
     $RW_W1C assign $GenRegName_$GenRegField_$GenPStrbIndex_clr = $GenRegName_byte_we[$GenPStrbIndex] & (&pwdata[$GenPartialBitRange]);
-    $RW_W0C$WO0 assign $GenRegName_$GenRegField_$GenPStrbIndex_w0 = $GenRegName_byte_we[$GenPStrbIndex] & (~|pwdata[$GenPartialBitRange]);
+    $POW0$RW_W0C$WO0 assign $GenRegName_$GenRegField_$GenPStrbIndex_w0 = $GenRegName_byte_we[$GenPStrbIndex] & (~|pwdata[$GenPartialBitRange]);
     $RW_W0C$WO0 assign $GenRegName_$GenRegField_$GenPStrbIndex_clr = $GenRegName_$GenRegField_$GenPStrbIndex_w0;
     $ROC assign $GenRegName_$GenRegField_$GenPStrbIndex_clr = $GenRegName_read_en;
     //
-    $GenNOT$RW_WS$RW_W1S$RW_W0S$WO1$ROS$RW_WC$RW_W1C$RW_W0C$WO0$ROC assign $GenRegName_sc_value[$GenPartialBitRange] = $GenRegName_ivalue[$GenPartialBitRange];
+    $GenNOT$RW_WS$RW_W1S$RW_W0S$WO1$ROS$RW_WC$RW_W1C$RW_W0C$WO0$ROC assign $GenRegName_sc_value[$GenPartialBitRange] = $GenRegName_ivalue_next[$GenPartialBitRange];
     //Write from internal operation
-    $RWI$RO$ROC$ROS assign $GenRegName_ivalue[$GenPartialBitRange] = $GenRegName_$GenRegField_iwe? $GenRegName_ivalue[$GenPartialBitRange]: $GenRegName_reg[$GenPartialBitRange];
-    $GenNOT$RWI$RO$ROC$ROS assign $GenRegName_ivalue[$GenPartialBitRange] = $GenRegName_reg[$GenPartialBitRange];
+    $RESERVED$RWI$RO$ROC$ROS assign $GenRegName_ivalue_next[$GenPartialBitRange] = $GenRegName_$GenRegField_iwe? $GenRegName_ivalue[$GenPartialBitRange]: $GenRegName_reg[$GenPartialBitRange];
+    $GenNOT$RWI$RO$ROC$ROS assign $GenRegName_ivalue_next[$GenPartialBitRange] = $GenRegName_reg[$GenPartialBitRange];
   $GenEndLoop
   //
   $GenStartLoop$GenRegName$GenRegField$GenPartialBitRange
-    //assign $GenRegName_next[$GenPartialBitRange] = $GenRegName_next[$GenPartialBitRange];
     $GenAsyncReset always_ff @ (posedge reg_clk, negedge reg_rst_n) begin
     $GenSyncReset always_ff @ (posedge reg_clk) begin
       if (!reg_rst_n)
@@ -194,7 +201,7 @@ module $GenModuleName
   //Read data - related to field (GenRegField) and strobe (GenPartialBitRange)
   $GenStartLoop$GenRegName$GenRegField$GenPartialBitRange
     $GenNOT$WO$WO1$WO0$WOC$WOS assign $GenRegName_rvalue[$GenPartialBitRange] = $GenRegName_read_en? $GenRegName_reg[$GenPartialBitRange]: '0;
-    $RESERVED$WO$WO1$WO0$WOC$WOS assign $GenRegName_rvalue[$GenPartialBitRange] = '0;
+    $WO$WO1$WO0$WOC$WOS assign $GenRegName_rvalue[$GenPartialBitRange] = '0;
   $GenEndLoop
   //
   assign prdata_next = $GenRDataOR;
