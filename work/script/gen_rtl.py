@@ -16,8 +16,8 @@ sys.path.append(lib_path)
 from RegSpec import RegSpec
 
 # in RegSpec[RegSpec_*]['Common_Config'] = {}
-normal_variables = ["GenModuleName", "GenWProtParam", "GenWProtErrParam", "GenSecParam", "GenSecErrParam", "GenAsyncParam", "GenSyncStageParam", "GenAddrParam", "GenDataParam"]
-normal_conditions = ["GenWProtParam", "GenAsyncReset", "GenSyncReset"]
+normal_variables = ["GenModuleName", "GenDataParam", "GenAddrParam", "GenAsyncParam", "GenSyncStageParam", "GenWProtParam", "GenSecParam", "GenWProtErrParam", "GenSecErrParam"]
+normal_conditions = ["GenSyncReset", "GenAsyncReset", "GenWProtParam"]
 
 # sub function
 def normal_variables_replace(line):
@@ -72,9 +72,6 @@ def process_loop (loop_type, lines_temp, line_print, reg_key, field_key, split_k
               print_flag = 0
               break
       else:
-        #if RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['GenRegField'] == 'RESERVED':
-        #  print_flag = 0 # skip if RESERVED
-        #else:
         if loop_type == 2:
           condition_check = RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['RW_Property']
         elif loop_type == 3:
@@ -95,11 +92,9 @@ def process_loop (loop_type, lines_temp, line_print, reg_key, field_key, split_k
         else:
           line_temp = line_temp.replace(' ', '', 1) # remove 1 space at the  beginning
           print_flag = 1
-          #print_flag = 1 if RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['GenRegField'] != 'RESERVED' else 0
       else:
         line_temp = line_temp_backup
         print_flag = 1
-        #print_flag = 1 if RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['GenRegField'] != 'RESERVED' else 0
     elif '$' in first_element:
       list_condition = re.escape(first_element) # backslash: $first_element -> \$first_element
       line_temp = re.sub(list_condition, "", line_temp) # keep rtl code, remove list_condition
@@ -143,31 +138,31 @@ def process_loop (loop_type, lines_temp, line_print, reg_key, field_key, split_k
             if condition in condition_check:
               print_flag = 1
               break
-    else:          
-      if loop_type == 1:
-        print_flag = 1
-      else:
-        print_flag = 1
-        #print_flag = 1 if RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['GenRegField'] != 'RESERVED' else 0
+    else:
+      print_flag = 1
       
     if print_flag == 1:
+      # Reg Common_Config
       if '$GenRegName' in line_temp:
         line_temp = line_temp.replace('$GenRegName', RegSpec[spec_sheet][reg_key]['Common_Config']['GenRegName'])
-      if '$GenRegField' in line_temp:
-        line_temp = line_temp.replace('$GenRegField', RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['GenRegField'])
       if '$GenRegOffsetParam' in line_temp:
         line_temp = line_temp.replace('$GenRegOffsetParam', RegSpec[spec_sheet][reg_key]['Common_Config']['GenRegOffsetParam'])
-      if '$GenFullBitRange' in line_temp:
-        bit_max = int(max(RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['Ful_BitRange']))
-        bit_min = int(min(RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['Ful_BitRange']))
-        GenFullBitRange = str(bit_max) if bit_max == bit_min else str(bit_max) + ":" + str(bit_min)
-        line_temp = line_temp.replace('$GenFullBitRange', GenFullBitRange)
+      # Field Common_Config
+      if '$GenRegField' in line_temp:
+        line_temp = line_temp.replace('$GenRegField', RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['GenRegField'])
+      # BitRange Common_Config
       if '$GenPartialBitRange' in line_temp:
         line_temp = line_temp.replace('$GenPartialBitRange', RegSpec[spec_sheet][reg_key][field_key][split_key]['GenPartialBitRange'])
       if '$GenFieldReset' in line_temp:
         line_temp = line_temp.replace('$GenFieldReset', RegSpec[spec_sheet][reg_key][field_key][split_key]['GenFieldReset'])
       if '$GenPStrbIndex' in line_temp:
         line_temp = line_temp.replace('$GenPStrbIndex', RegSpec[spec_sheet][reg_key][field_key][split_key]['GenPStrbIndex']) 
+      # Remain Other
+      if '$GenFullBitRange' in line_temp:
+        bit_max = int(max(RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['Ful_BitRange']))
+        bit_min = int(min(RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['Ful_BitRange']))
+        GenFullBitRange = str(bit_max) if bit_max == bit_min else str(bit_max) + ":" + str(bit_min)
+        line_temp = line_temp.replace('$GenFullBitRange', GenFullBitRange)
       if '$Gen' in line_temp: # has normal variables to be replaced
         line_temp = normal_variables_replace(line_temp)
       line_print += line_temp
@@ -234,7 +229,7 @@ def process_print (process_type, lines, line_print, line_internal_print):
             condition = condition.replace('\$','')
             if RegSpec[spec_sheet]['Common_Config'][condition] == "0": # condition = 0, not gen
               continue
-          if '$GenRDataOR' in line:
+          if '$GenRDataOR' in line: # special case for GenRDataOR
             GenRDataOR = " | ".join(RegSpec[spec_sheet]['Common_Config']['GenRDataOR'])
             line = line.replace('$GenRDataOR', GenRDataOR)
           if '$Gen' in line: # remain variables after check condition
@@ -265,7 +260,8 @@ for spec_cnt in range(1, len([*RegSpec])):
   lines = rtl_sample.readlines()
   line_print = process_print ("top", lines, '', line_internal_print)
   
-  rtl_output.write(line_print) # write all content to output RTL
+  # write all content to output RTL
+  rtl_output.write(line_print)
   rtl_output.close()
 
 # finish

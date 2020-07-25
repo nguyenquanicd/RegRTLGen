@@ -202,10 +202,10 @@ for sheet in workbook:
           # GenRegName, Register_Description & GenRegOffsetParam
           GenRegName           = row[2].value
           Register_Description = row[3].value
-          GenRegOffsetParam     = row[4].value
+          GenRegOffsetParam    = row[4].value
           content += "RegSpec['%s']['%s']['Common_Config']['%s'] = \"%s\"\n" % (sheet.title, register_name, 'GenRegName',           GenRegName)
           content += "RegSpec['%s']['%s']['Common_Config']['%s'] = \"%s\"\n" % (sheet.title, register_name, 'Register_Description', Register_Description)
-          content += "RegSpec['%s']['%s']['Common_Config']['%s'] = \"%s\"\n" % (sheet.title, register_name, 'GenRegOffsetParam',     GenRegOffsetParam)
+          content += "RegSpec['%s']['%s']['Common_Config']['%s'] = \"%s\"\n" % (sheet.title, register_name, 'GenRegOffsetParam',    GenRegOffsetParam)
           
           # add for GenRDataOR
           content += "RegSpec['%s']['Common_Config']['GenRDataOR'].append(\"%s_rvalue\")\n" % (sheet.title, GenRegName)
