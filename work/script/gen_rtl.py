@@ -127,17 +127,17 @@ def process_loop (loop_type, lines_temp, line_print, reg_key, field_key, split_k
               print_flag = 1
               break
       else:
-        if RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['GenRegField'] == 'RESERVED':
-          print_flag = 1 if 'RESERVED' in condition_array else 0
-        else:
-          if loop_type == 2:
-            condition_check = RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['RW_Property']
-          elif loop_type == 3:
-            condition_check = RegSpec[spec_sheet][reg_key][field_key][split_key]['RW_Property']
-          for condition in condition_array: # check all RW property
-            if condition in condition_check:
-              print_flag = 1
-              break
+        #if RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['GenRegField'] == 'RESERVED':
+        #  print_flag = 1 if 'RESERVED' in condition_array else 0
+        #else:
+        if loop_type == 2:
+          condition_check = RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['RW_Property']
+        elif loop_type == 3:
+          condition_check = RegSpec[spec_sheet][reg_key][field_key][split_key]['RW_Property']
+        for condition in condition_array: # check all RW property
+          if condition in condition_check:
+            print_flag = 1
+            break
     else:
       print_flag = 1
       

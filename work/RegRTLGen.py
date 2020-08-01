@@ -14,17 +14,23 @@ script_path = os.path.dirname(__file__)
 lib_path = script_path + "/../lib/pyLib"
 sys.path.append(lib_path)
 
+# check input file
+input_file = argv[1]
+if not os.path.exists(input_file):
+  print ("Input file is not exists!")
+  sys.exit()
+  
 # remove old log
 if os.path.exists("Error.log"):
   os.remove("Error.log")
 if os.path.exists('finish_all'):
   os.remove("finish_all")
+ 
 # progress bar
 command = script_path + "/script/progress_bar.py"
 subprocess.Popen(command, shell=True)
 
 # read input specification
-input_file = argv[1]
 command = script_path + "/script/read_input.py " + argv[1]
 subprocess.call(command, shell=True)
 
@@ -40,5 +46,4 @@ subprocess.Popen(command, shell=True)
 while (not os.path.exists("finish_all")):
   time.sleep(1)
 os.remove("finish_all")
-
 print ("\n\tCongratulation! Mission completed!")

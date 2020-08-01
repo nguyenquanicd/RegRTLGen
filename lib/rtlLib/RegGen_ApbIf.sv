@@ -2,8 +2,8 @@
 //Copyright © 2020 by VLSI Technology blog in Vietnam
 //Website    : http://nguyenquanicd.blogspot.com/
 //Author     :
-//  RTL design - Nguyen Hung Quan (nguyenquan.icd@gmail.com)
-//  Tool design- Le Hoang Van     (lehoangvan.for.business@gmail.com)
+// RTL design  - Nguyen Hung Quan (nguyenquan.icd@gmail.com)
+// Tool design - Le Hoang Van     (lehoangvan.for.business@gmail.com)
 //Description: Register file with APB interface
 //Language   : System Verilog
 //Model type : Synthesizable
@@ -42,7 +42,7 @@ module $GenModuleName
       $RW$RWI$RW_RC$RW_RS$RW_WC$RW_WS$RW_W1C$RW_W0S$RW_W1S$RW_W0S$WO$WOC$WOS$WO0$WO1 output logic [REGGEN_DATA_WIDTH-1:0] $GenRegName_reg,
     $GenEndLoop
     $GenStartLoop$GenRegName$GenRegField
-      $RESERVED$RWI$RO$ROC$ROS input  logic $GenRegName_$GenRegField_iwe,
+      $RWI$RO$ROC$ROS input  logic $GenRegName_$GenRegField_iwe,
     $GenEndLoop
     $GenStartLoop$GenRegName$GenRegField$GenPartialBitRange
       $POW1 output logic $GenRegName_$GenRegField_$GenPStrbIndex_w1,
@@ -165,7 +165,7 @@ module $GenModuleName
     //Reg  : $GenRegName[$GenPartialBitRange] $GenRegField 
     //APB Write
     $GenNOT$RO$ROS$ROC$RWI assign $GenRegName_next[$GenPartialBitRange] = $GenRegName_byte_we[$GenPStrbIndex]? pwdata[$GenPartialBitRange]: $GenRegName_sc_value[$GenPartialBitRange];
-    $RESERVED$RO$ROS$ROC$RWI assign $GenRegName_next[$GenPartialBitRange] = $GenRegName_sc_value[$GenPartialBitRange];
+    $RO$ROS$ROC$RWI assign $GenRegName_next[$GenPartialBitRange] = $GenRegName_sc_value[$GenPartialBitRange];
     //Write to set
     $RW_WS$RW_W1S$RW_W0S$WO1$ROS assign $GenRegName_sc_value[$GenPartialBitRange] = $GenRegName_$GenRegField_$GenPStrbIndex_set? '1: $GenRegName_ivalue_next[$GenPartialBitRange];
     $RW_WS assign $GenRegName_$GenRegField_$GenPStrbIndex_set = $GenRegName_byte_we[$GenPStrbIndex];
@@ -183,7 +183,7 @@ module $GenModuleName
     //
     $GenNOT$RW_WS$RW_W1S$RW_W0S$WO1$ROS$RW_WC$RW_W1C$RW_W0C$WO0$ROC assign $GenRegName_sc_value[$GenPartialBitRange] = $GenRegName_ivalue_next[$GenPartialBitRange];
     //Write from internal operation
-    $RESERVED$RWI$RO$ROC$ROS assign $GenRegName_ivalue_next[$GenPartialBitRange] = $GenRegName_$GenRegField_iwe? $GenRegName_ivalue[$GenPartialBitRange]: $GenRegName_reg[$GenPartialBitRange];
+    $RWI$RO$ROC$ROS assign $GenRegName_ivalue_next[$GenPartialBitRange] = $GenRegName_$GenRegField_iwe? $GenRegName_ivalue[$GenPartialBitRange]: $GenRegName_reg[$GenPartialBitRange];
     $GenNOT$RWI$RO$ROC$ROS assign $GenRegName_ivalue_next[$GenPartialBitRange] = $GenRegName_reg[$GenPartialBitRange];
   $GenEndLoop
   //
