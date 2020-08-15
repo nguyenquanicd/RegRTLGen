@@ -15,26 +15,25 @@
   output logic [REGGEN_DATA_WIDTH-1:0] prdata  
   input  logic pclk,      //APB clock
   input  logic preset_n,   //APB reset is synchronized to pclk    
-  
+
+//// Pre setting
   // Write protection = YES
   input  logic write_protect_en,
-  
   //RWI RO ROC ROS
   input  logic [REGGEN_DATA_WIDTH-1:0] $GenRegName_ivalue,
   input  logic $GenRegName_$GenRegField_iwe,
-  
+///
 
   
-  
+//// Option 1: seperate with APB I/F  - Option 2: merge with APB I/F
   // all Write property
   output logic [REGGEN_DATA_WIDTH-1:0] $GenRegName_reg,
-  
   // POR
   output logic $GenRegName_read_en,
-  
   // POW POW0 POW1
   output logic [REGGEN_STRB_WIDTH-1:0] $GenRegName_byte_we,
     // POW1 
     output logic $GenRegName_$GenRegField_$GenPStrbIndex_w1,
     // POW0 
     output logic $GenRegName_$GenRegField_$GenPStrbIndex_w0,
+////
