@@ -18,7 +18,7 @@ from openpyxl import load_workbook
 ## Main process
 # load input spec
 input_file = argv[1]
-workbook = load_workbook(filename=input_file)
+workbook = load_workbook(filename=input_file, read_only=True)
 
 # create variable structure
 RegSpec = open(script_path + "/RegSpec.py", "w")
@@ -50,7 +50,9 @@ for sheet in workbook:
     register_table_flag = 0
     register_count      = 0
     for row in sheet.rows:
-      if config_table_flag == 1:
+      if len(row) == 0:
+        continue
+      elif config_table_flag == 1:
         config_name  = row[0].value
         config_value = row[1].value
         if config_name == None: # end of table
