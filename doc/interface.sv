@@ -1,11 +1,10 @@
-///
-  // clock & reset
+
+  //// clock & reset
   input  logic reg_clk,   //User clock
   input  logic reg_rst_n, //User reset is synchronized to reg_clk
-///
-  
-///
-  // APB interface 
+
+
+  //// APB interface 
   input  logic psel,
   input  logic penable,
   input  logic pwrite,
@@ -18,7 +17,10 @@
   output logic [REGGEN_DATA_WIDTH-1:0] prdata  
   input  logic pclk,      //APB clock
   input  logic preset_n,   //APB reset is synchronized to pclk    
+  input  logic write_protect_en,
   
+  
+  //// User interface
   // all Write property
   output logic [REGGEN_DATA_WIDTH-1:0] $GenRegName_reg,
   
@@ -31,19 +33,12 @@
     output logic $GenRegName_$GenRegField_$GenPStrbIndex_w1,
     // POW0 
     output logic $GenRegName_$GenRegField_$GenPStrbIndex_w0,
-///
-    
-///
-  // Write protection = YES
-  input  logic write_protect_en,
   
   //RWI RO ROC ROS
   input  logic [REGGEN_DATA_WIDTH-1:0] $GenRegName_ivalue,
   input  logic $GenRegName_$GenRegField_iwe,
-/// 
 
-
-=> write_protect_en
+  
 
                 REG A:
           => $GenRegName_$GenRegField_iwe|        
