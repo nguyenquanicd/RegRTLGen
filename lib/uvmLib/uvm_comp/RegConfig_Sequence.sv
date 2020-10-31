@@ -1,111 +1,39 @@
 //--------------------------------------
-//Project: The UVM environemnt for UART (Universal Asynchronous Receiver Transmitter)
-//Function: Common sequences help create the user sequences easily
-//  - User adds more the common sequences in this file
-//Author:  Pham Thanh Tram, Nguyen Sinh Ton, Doan Duc Hoang, Truong Cong Hoang Viet, Nguyen Hung Quan
+//Project: The UVM environemnt for RegisterRTL
+//Function: Register Config sequence
+//Author:  Le Hoang Van
 //Page:    VLSI Technology
 //--------------------------------------
 
 //--------------------------------------
-//Write sequence
+//Register Config sequence
 //--------------------------------------
-class cApbMasterWriteSeq extends uvm_sequence#(cApbTransaction);
-	`uvm_object_utils(cApbMasterWriteSeq)
-	`uvm_declare_p_sequencer(cApbMasterSequencer)
+class RegConfig_Seq extends uvm_sequence#(RegConfig_Transaction);
+	`uvm_object_utils(RegConfig_Seq)
+	`uvm_declare_p_sequencer(RegConfig_Sequencer)
   
-  cApbTransaction coApbTransaction;
+  RegConfig_Transaction RegConfig_Trans;
   
-  rand logic conEn;
-	rand logic [31:0] addr;
-	rand logic [31:0] data;
-	rand logic [ 3:0] be;	
+  rand logic [31:0] Reg_Addr;
+  rand logic [31:0] Reg_Data;
+  rand int   Reg_Upper_bit;
+  rand int   Reg_Lower_bit;
+  rand logic Reg_IWE_value;
 
-	function new (string name = "cApbMasterWriteSeq");
+	function new (string name = "RegConfig_Seq");
 		super.new(name);
-    coApbTransaction = cApbTransaction::type_id::create("coApbTransaction");
+    RegConfig_Trans = RegConfig_Transaction::type_id::create("RegConfig_Trans");
 	endfunction
 
 	virtual task body();
-		start_item(coApbTransaction);
-    //coApbTransaction.randomize();
-		assert(coApbTransaction.randomize() with {
-      coApbTransaction.apbSeqEn  == 1;
-      coApbTransaction.apbConEn  == conEn;
-			coApbTransaction.paddr  == addr;
-			coApbTransaction.pwdata == data;
-			coApbTransaction.pstrb  == be;
-			coApbTransaction.pwrite == 1;
+		start_item(RegConfig_Trans);
+		assert(RegConfig_Trans.randomize() with {
+      RegConfig_Trans.Addr       == Reg_Addr;
+      RegConfig_Trans.Data       == Reg_Data;
+			RegConfig_Trans.Upper_bit  == Reg_Upper_bit;
+			RegConfig_Trans.Lower_bit  == Reg_Lower_bit;
+			RegConfig_Trans.IWE_value  == Reg_IWE_value;
 		});
-		finish_item(coApbTransaction);
-	endtask
-endclass
-//--------------------------------------
-//Read sequence
-//--------------------------------------
-class cApbMasterReadSeq extends uvm_sequence#(cApbTransaction);
-	`uvm_object_utils(cApbMasterReadSeq)
-	`uvm_declare_p_sequencer(cApbMasterSequencer)
-  
-  cApbTransaction coApbTransaction;
-  
-  rand logic conEn;
-	rand logic [31:0] addr;
-  rand logic [31:0] expectedReadData;
-  rand logic [31:0] mask;
-  logic [31:0] compareResult;
-
-	function new (string name = "cApbMasterReadSeq");
-		super.new(name);
-    coApbTransaction = cApbTransaction::type_id::create("coApbTransaction");
-	endfunction
-
-	virtual task body();
-   
-		start_item(coApbTransaction);
-		assert(coApbTransaction.randomize() with {
-      coApbTransaction.apbSeqEn  == 1;
-      coApbTransaction.apbConEn  == conEn;
-			coApbTransaction.paddr  == addr;
-			coApbTransaction.pwrite == 0;
-		});
-		finish_item(coApbTransaction);
-    //Compare the actual data and the expected data
-    compareResult = (coApbTransaction.prdata ^ expectedReadData) & mask;
-    if (compareResult) begin
-      `uvm_error("READ FAIL", $sformatf("Address: %8h, Expected data: %8h, Actual data: %8h, Mask: %8h", addr, expectedReadData, coApbTransaction.prdata, mask));
-    end
-	endtask
-endclass
-
-
-//--------------------------------------
-//Read sequence without compare
-//VietHT
-//--------------------------------------
-class cApbMasterWriteSeqNotCmpr extends uvm_sequence#(cApbTransaction);
-	`uvm_object_utils(cApbMasterWriteSeqNotCmpr)
-	`uvm_declare_p_sequencer(cApbMasterSequencer)
-  
-  cApbTransaction coApbTransaction;
-  
-    rand logic conEn;
-	rand logic [31:0] addr;
-	rand logic [31:0] data;
-    rand logic [31:0] mask;	
-
-	function new (string name = "cApbMasterWriteSeqNotCmpr");
-		super.new(name);
-    coApbTransaction = cApbTransaction::type_id::create("coApbTransaction");
-	endfunction
-
-	virtual task body();
-		start_item(coApbTransaction);
-		assert(coApbTransaction.randomize() with {
-            coApbTransaction.apbSeqEn  == 1;
-            coApbTransaction.apbConEn  == conEn;
-			coApbTransaction.paddr  == addr;
-			coApbTransaction.pwrite == 0;
-		});
-		finish_item(coApbTransaction);
+		finish_item(RegConfig_Trans);
 	endtask
 endclass
