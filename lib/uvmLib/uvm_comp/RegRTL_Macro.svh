@@ -1,9 +1,25 @@
 //--------------------------------------
-//Project: The UVM environemnt for UART (Universal Asynchronous Receiver Transmitter)
-//Function: Define user macros
-//Author:  Pham Thanh Tram, Nguyen Sinh Ton, Doan Duc Hoang, Truong Cong Hoang Viet, Nguyen Hung Quan
+//Project: The UVM environemnt for RegisterRTL
+//Function: Register Config Transaction
+//Author:  Le Hoang Van, XXX
 //Page:    VLSI Technology
 //--------------------------------------
+
+//--------------------------------------
+// Setting for "RWI RO ROC ROS" Register
+// address - 32-bit write address
+// value - 32-bit write value 
+// enable - logic 0/1
+//--------------------------------------
+`define RegConfig(address,value,upper,lower,enable) \
+`uvm_do_on_with(RegConfigSeq, p_sequencer.coApbMasterAgentTx.coApbMasterSequencer, { \
+               RegConfigSeq.Reg_Addr[31:0] == address; \
+               RegConfigSeq.Reg_Data[31:0] == value; \
+               RegConfigSeq.Reg_Upper_bit  == upper; \
+               RegConfigSeq.Reg_Lower_bit  == lower; \
+               RegConfigSeq.Reg_IWE_value  == enable; \
+               })
+               
 //--------------------------------------
 //Write "value" to "address" of a register of UART-TX
 // address - 32-bit write address

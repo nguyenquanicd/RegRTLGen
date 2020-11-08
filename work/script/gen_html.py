@@ -32,7 +32,7 @@ for spec_cnt in range(1, len([*RegSpec])):
     reg_key = [*RegSpec[spec_sheet]][reg_cnt]
     
     GenRegName           = RegSpec[spec_sheet][reg_key]['Common_Config']['GenRegName']
-    GenRegOffsetParam     = RegSpec[spec_sheet][reg_key]['Common_Config']['GenRegOffsetParam']
+    GenRegOffsetParam    = RegSpec[spec_sheet][reg_key]['Common_Config']['GenRegOffsetParam']
     Register_Description = RegSpec[spec_sheet][reg_key]['Common_Config']['Register_Description']
     
     sumarize_table += "<tr><td>%s<td>%s<td>%s\n" % (GenRegName, GenRegOffsetParam, 'T.B.D')
