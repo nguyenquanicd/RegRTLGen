@@ -17,30 +17,51 @@ sys.path.append(lib_path)
 from RegSpec import RegSpec
 
 internal_conditions = ["RWI", "RO", "ROC", "ROS"]
-pulse_conditions = ["POW", "POW0", "POW1"]
+pulse_conditions    = ["POW", "POW0", "POW1"]
 
 ## Main process
 for spec_cnt in range(1, len([*RegSpec])):
-  spec_sheet = [*RegSpec][spec_cnt]
-  input_path = script_path + "/../../lib/uvmLib"
+  spec_sheet  = [*RegSpec][spec_cnt]
+  input_path  = script_path + "/../../lib/uvmLib"
   output_path = script_path + "/../../output/" + RegSpec[spec_sheet]['Common_Config']['GenModuleName'] + "_uvm"
   shutil.copytree(input_path, output_path, dirs_exist_ok=True)
   
-  # RegConfig_Interface.sv
-  RegConfig_Interface_content  = ""
+  Interface_content          = ""
+  Transaction_content        = ""
+  Driver_content_default     = "      default : begin \n"
+  Monitor_content_create     = ""
+  Monitor_content_regist     = ""
+  Monitor_content_collect    = ""
+  Monitor_content_task       = ""
   
   for reg_cnt in range(1, len([*RegSpec[spec_sheet]])):
     reg_key = [*RegSpec[spec_sheet]][reg_cnt]
-    GenRegName = RegSpec[spec_sheet][reg_key]['Common_Config']['GenRegName']
+    GenRegName        = RegSpec[spec_sheet][reg_key]['Common_Config']['GenRegName']
+    GenRegOffsetParam = RegSpec[spec_sheet][reg_key]['Common_Config']['GenRegOffsetParam']
+    
+    # Transaction for Monitor
+    Monitor_content_create  += f"  {GenRegName}_monitor co_{GenRegName}_monitor; \n"
+    Monitor_content_create  += f"  uvm_analysis_port #({GenRegName}_monitor) ap_{GenRegName}_monitor; \n"
+    Monitor_content_regist  += f"    co_{GenRegName}_monitor = {GenRegName}_monitor::type_id::create(\"co_{GenRegName}_monitor\",this); \n"
+    Monitor_content_regist  += f"    ap_{GenRegName}_monitor = new(\"ap_{GenRegName}_monitor\", this);	\n"
+    Monitor_content_collect += f"      {GenRegName}_collect_data(); \n"
     
     # output logic [REGGEN_DATA_WIDTH-1:0] $GenRegName_reg,
-    RegConfig_Interface_content += "  logic [31:0] " + GenRegName + "_reg; \n"
+    Interface_content         += f"  logic [31:0] {GenRegName}_reg; \n"
+    Transaction_content_create = f"  rand logic [31:0] {GenRegName}_reg; \n"
+    Transaction_content_regist = f"    `uvm_field_int({GenRegName}_reg, UVM_ALL_ON) \n"
+    Monitor_content_change     = f"vif_RegConfig_IF.{GenRegName}_reg \n"  
+    Monitor_content_assign     = f"        co_{GenRegName}_monitor.{GenRegName}_reg = vif_RegConfig_IF.{GenRegName}_reg; \n"
     
     # output logic $GenRegName_read_en
     for strobe_cnt in range (0, len([*RegSpec[spec_sheet][reg_key]['Common_Config']['RW_Property']])):
       strobe_key = [*RegSpec[spec_sheet][reg_key]['Common_Config']['RW_Property']][strobe_cnt]
       if 'POR' in RegSpec[spec_sheet][reg_key]['Common_Config']['RW_Property'][strobe_key]:
-        RegConfig_Interface_content += "  logic " + GenRegName + "_read_en; \n"
+        Interface_content          += f"  logic {GenRegName}_read_en; \n"
+        Transaction_content_create += f"  rand logic {GenRegName}_read_en; \n"
+        Transaction_content_regist += f"    `uvm_field_int({GenRegName}_read_en, UVM_ALL_ON) \n"
+        Monitor_content_change     += f"        or vif_RegConfig_IF.{GenRegName}_read_en \n"  
+        Monitor_content_assign     += f"        co_{GenRegName}_monitor.{GenRegName}_read_en = vif_RegConfig_IF.{GenRegName}_read_en; \n"
         break
     
     # output logic [REGGEN_STRB_WIDTH-1:0] $GenRegName_byte_we
@@ -52,7 +73,11 @@ for spec_cnt in range(1, len([*RegSpec])):
           byte_we_match = 1
           break
       if byte_we_match == 1:
-        RegConfig_Interface_content += "  logic [3:0] " + GenRegName + "_byte_we; \n"
+        Interface_content          += f"  logic [3:0] {GenRegName}_byte_we; \n"
+        Transaction_content_create += f"  rand logic [3:0] {GenRegName}_byte_we; \n"
+        Transaction_content_regist += f"    `uvm_field_int({GenRegName}_byte_we, UVM_ALL_ON) \n"
+        Monitor_content_change     += f"        or vif_RegConfig_IF.{GenRegName}_byte_we \n"  
+        Monitor_content_assign     += f"        co_{GenRegName}_monitor.{GenRegName}_byte_we = vif_RegConfig_IF.{GenRegName}_byte_we; \n"
         break
         
     # input logic [REGGEN_DATA_WIDTH-1:0] $GenRegName_ivalue
@@ -64,17 +89,36 @@ for spec_cnt in range(1, len([*RegSpec])):
           ivalue_match = 1
           break
       if ivalue_match == 1:
-        RegConfig_Interface_content += "  logic [31:0] " + GenRegName + "_ivalue; \n"
+        Interface_content          += f"  logic [31:0] {GenRegName}_ivalue; \n"
+        Transaction_content_create += f"  rand logic [31:0] {GenRegName}_ivalue; \n"
+        Transaction_content_regist += f"    `uvm_field_int({GenRegName}_ivalue, UVM_ALL_ON) \n"
+        Driver_content_case         = f"      {GenRegOffsetParam} : begin \n"
+        Driver_content_case        += f"        v_RegConfig_IF.{GenRegName}_ivalue = Config_Trans.Data; \n"
+        Driver_content_default     += f"        v_RegConfig_IF.{GenRegName}_ivalue = 'h0; \n"
+        Monitor_content_change     += f"        or vif_RegConfig_IF.{GenRegName}_ivalue \n"  
+        Monitor_content_assign     += f"        co_{GenRegName}_monitor.{GenRegName}_ivalue = vif_RegConfig_IF.{GenRegName}_ivalue; \n"
         break  
 
     for field_cnt in range(1, len([*RegSpec[spec_sheet][reg_key]])):
       field_key = [*RegSpec[spec_sheet][reg_key]][field_cnt]
-      GenRegField = RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['GenRegField']
-      
+      GenRegField     = RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['GenRegField']
+      bit_max = int(max(RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['Ful_BitRange']))
+      bit_min = int(min(RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['Ful_BitRange']))
+      if bit_max == bit_min:
+        GenFullBitRange = f"Driver_IWE[{bit_max}]"
+      else:
+        GenFullBitRange = "|Driver_IWE[{}:{}]".format(bit_max, bit_min)
+        
       # input logic $GenRegName_$GenRegField_iwe
       for condition in internal_conditions:
         if condition in RegSpec[spec_sheet][reg_key][field_key]['Common_Config']['RW_Property']:
-          RegConfig_Interface_content += "  logic " + GenRegName + "_" + GenRegField + "_iwe; \n"
+          Interface_content          += f"  logic {GenRegName}_{GenRegField}_iwe; \n"
+          Transaction_content_create += f"  rand logic {GenRegName}_{GenRegField}_iwe; \n"
+          Transaction_content_regist += f"    `uvm_field_int({GenRegName}_{GenRegField}_iwe, UVM_ALL_ON) \n"
+          Driver_content_case        += f"        v_RegConfig_IF.{GenRegName}_{GenRegField}_iwe = {GenFullBitRange}; \n"
+          Driver_content_default     += f"        v_RegConfig_IF.{GenRegName}_{GenRegField}_iwe = 'h0; \n"
+          Monitor_content_change     += f"        or vif_RegConfig_IF.{GenRegName}_{GenRegField}_iwe \n"  
+          Monitor_content_assign     += f"        co_{GenRegName}_monitor.{GenRegName}_{GenRegField}_iwe = vif_RegConfig_IF.{GenRegName}_{GenRegField}_iwe; \n"
           break
 
       for split_cnt in range(1, len([*RegSpec[spec_sheet][reg_key][field_key]])):
@@ -83,25 +127,115 @@ for spec_cnt in range(1, len([*RegSpec])):
         
         # output logic $GenRegName_$GenRegField_$GenPStrbIndex_w1
         if 'POW1' in RegSpec[spec_sheet][reg_key][field_key][split_key]['RW_Property']:
-          RegConfig_Interface_content += "  logic " + GenRegName + "_" + GenRegField + "_" + GenPStrbIndex +  "_w1; \n"
+          Interface_content          += f"  logic {GenRegName}_{GenRegField}_{GenPStrbIndex}_w1; \n"
+          Transaction_content_create += f"  rand logic {GenRegName}_{GenRegField}_{GenPStrbIndex}_w1; \n"
+          Transaction_content_regist += f"    `uvm_field_int({GenRegName}_{GenRegField}_{GenPStrbIndex}_w1, UVM_ALL_ON) \n"
+          Monitor_content_change     += f"        or vif_RegConfig_IF.{GenRegName}_{GenRegField}_{GenPStrbIndex}_w1 \n"  
+          Monitor_content_assign     += f"        co_{GenRegName}_monitor.{GenRegName}_{GenRegField}_{GenPStrbIndex}_w1 = vif_RegConfig_IF.{GenRegName}_{GenRegField}_{GenPStrbIndex}_w1; \n"
         # output logic $GenRegName_$GenRegField_$GenPStrbIndex_w0
         if 'POW0' in RegSpec[spec_sheet][reg_key][field_key][split_key]['RW_Property']:
-          RegConfig_Interface_content += "  logic " + GenRegName + "_" + GenRegField + "_" + GenPStrbIndex +  "_w0; \n"
+          Interface_content          += f"  logic {GenRegName}_{GenRegField}_{GenPStrbIndex}_w0; \n"
+          Transaction_content_create += f"  rand logic {GenRegName}_{GenRegField}_{GenPStrbIndex}_w0; \n"
+          Transaction_content_regist += f"    `uvm_field_int({GenRegName}_{GenRegField}_{GenPStrbIndex}_w0, UVM_ALL_ON) \n"
+          Monitor_content_change     += f"        or vif_RegConfig_IF.{GenRegName}_{GenRegField}_{GenPStrbIndex}_w0 \n"  
+          Monitor_content_assign     += f"        co_{GenRegName}_monitor.{GenRegName}_{GenRegField}_{GenPStrbIndex}_w0 = vif_RegConfig_IF.{GenRegName}_{GenRegField}_{GenPStrbIndex}_w0; \n"
+          
+    Transaction_content += f"""
+class {GenRegName}_monitor extends uvm_sequence_item;
   
-  # Create: RegConfig_Driver.sv
-  final_path = output_path + "/uvm_comp/RegConfig_Interface.sv"
-  uvm_final = open(final_path, "w")
-  line_print = ""
-  # read sample
+{Transaction_content_create}
+  `uvm_object_utils_begin ({GenRegName}_monitor)
+{Transaction_content_regist}
+  `uvm_object_utils_end
+  
+  function new (string name = "{GenRegName}_monitor");
+    super.new(name);
+  endfunction: new
+
+endclass: {GenRegName}_monitor
+"""
+    
+    Monitor_content_task += f"""
+  virtual task {GenRegName}_collect_data();
+    while(1) begin
+      @({Monitor_content_change}
+      ) begin
+        #1ps
+{Monitor_content_assign}
+        ap_{GenRegName}_monitor.write(co_{GenRegName}_monitor);
+      end
+    end
+  endtask: {GenRegName}_collect_data
+"""
+    
+    if ivalue_match == 1:      
+      Driver_content_case += "      end \n"
+  Driver_content_default  += "      end \n"
+  
+  # Create: RegConfig_Interface.sv
   sample_path = input_path + "/uvm_comp/RegConfig_Interface.sv"
   uvm_sample = open(sample_path, "r")
   lines = uvm_sample.readlines()
+  line_print = ""
   for line in lines:
     if '// Content' in line:
-      line_print += RegConfig_Interface_content
+      line_print += Interface_content
     else:
       line_print += line
-  # write all content
+  final_path = output_path + "/uvm_comp/RegConfig_Interface.sv"
+  uvm_final = open(final_path, "w")
+  uvm_final.write(line_print)
+  uvm_final.close()
+  
+  # Create: RegConfig_Transaction.sv
+  sample_path = input_path + "/uvm_comp/RegConfig_Transaction.sv"
+  uvm_sample = open(sample_path, "r")
+  lines = uvm_sample.readlines()
+  line_print = ""
+  for line in lines:
+    if '// Content' in line:
+      line_print += Transaction_content
+    else:
+      line_print += line
+  final_path = output_path + "/uvm_comp/RegConfig_Transaction.sv"
+  uvm_final = open(final_path, "w")
+  uvm_final.write(line_print)
+  uvm_final.close()
+  
+  # Create: RegConfig_Driver.sv
+  sample_path = input_path + "/uvm_comp/RegConfig_Driver.sv"
+  uvm_sample = open(sample_path, "r")
+  lines = uvm_sample.readlines()
+  line_print = ""
+  for line in lines:
+    if '// Content' in line:
+      line_print += Driver_content_case
+      line_print += Driver_content_default
+    else:
+      line_print += line
+  final_path = output_path + "/uvm_comp/RegConfig_Driver.sv"
+  uvm_final = open(final_path, "w")
+  uvm_final.write(line_print)
+  uvm_final.close()
+  
+  # Create: RegConfig_Monitor.sv
+  sample_path = input_path + "/uvm_comp/RegConfig_Monitor.sv"
+  uvm_sample = open(sample_path, "r")
+  lines = uvm_sample.readlines()
+  line_print = ""
+  for line in lines:
+    if '// Content create' in line:
+      line_print += Monitor_content_create
+    elif '// Content regist' in line:
+      line_print += Monitor_content_regist
+    elif '// Content collect' in line:
+      line_print += Monitor_content_collect
+    elif '// Content task' in line:
+      line_print += Monitor_content_task
+    else:
+      line_print += line
+  final_path = output_path + "/uvm_comp/RegConfig_Monitor.sv"
+  uvm_final = open(final_path, "w")
   uvm_final.write(line_print)
   uvm_final.close()
 

@@ -1,11 +1,10 @@
 //--------------------------------------
 //Project: The UVM environemnt for RegisterRTL
-//Function: Register Config Transaction
-//Author:  Le Hoang Van
+//Function: Register Config Interface
+//Author:  Nguyen Hung Quan, Le Hoang Van, Le Tan Thinh
 //Page:    VLSI Technology
 //--------------------------------------
 
-// RegConfig Interface
 interface RegConfig_Interface;
   // Content
 endinterface: RegConfig_Interface

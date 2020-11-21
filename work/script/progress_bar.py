@@ -78,6 +78,8 @@ def remove_finish_flag():
     os.remove("finish_gen_rtl")
   if os.path.exists('finish_gen_html'):
     os.remove("finish_gen_html")
+  if os.path.exists('finish_gen_uvm'):
+    os.remove("finish_gen_uvm")
 
 def stop_progress():
   remove_finish_flag()
@@ -91,5 +93,7 @@ remove_finish_flag()
 progress_bar2("Read Input Spec ", 100, 0.03, 0.01, 5, "finish_read_input", "Error.log")
 progress_bar2("Generate RTL    ", 100, 0.03, 0.01, 5, "finish_gen_rtl", "Error.log")
 progress_bar2("Generate HTML   ", 100, 0.03, 0.01, 5, "finish_gen_html", "Error.log")
+progress_bar2("Generate UVM    ", 100, 0.03, 0.01, 5, "finish_gen_uvm", "Error.log")
+
 remove_finish_flag()
 open("finish_all", 'w').close()

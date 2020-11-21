@@ -1,16 +1,16 @@
 //--------------------------------------
-//Project: The UVM environemnt for UART (Universal Asynchronous Receiver Transmitter)
-//Function: APB sequencer
-//Author:  Pham Thanh Tram, Nguyen Sinh Ton, Doan Duc Hoang, Truong Cong Hoang Viet, Nguyen Hung Quan
+//Project: The UVM environemnt for RegisterRTL
+//Function: Register Config S
+//Author:  Nguyen Hung Quan, Le Hoang Van, Le Tan Thinh
 //Page:    VLSI Technology
 //--------------------------------------
 
-class cApbMasterSequencer extends uvm_sequencer#(cApbTransaction);
-	//Register to Factory
-	`uvm_component_utils(cApbMasterSequencer)
+class RegConfig_Sequencer extends uvm_sequencer#(RegConfig_Transaction);
+
+  `uvm_component_utils(RegConfig_Sequencer)
   
-  //Constructor
-	function new (string name = "cApbMasterSequencer", uvm_component parent = null);
-		super.new(name,parent);
-	endfunction
-endclass
+  function new (string name = "RegConfig_Sequencer", uvm_component parent = null);
+    super.new(name,parent);
+  endfunction: new
+  
+endclass: RegConfig_Sequencer
