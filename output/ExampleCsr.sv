@@ -2,8 +2,8 @@
 //Copyright © 2020 by VLSI Technology blog in Vietnam
 //Website    : http://nguyenquanicd.blogspot.com/
 //Author     :
-//  RTL design - Nguyen Hung Quan (nguyenquan.icd@gmail.com)
-//  Tool design- Le Hoang Van     (lehoangvan.for.business@gmail.com)
+// RTL design  - Nguyen Hung Quan (nguyenquan.icd@gmail.com)
+// Tool design - Le Hoang Van     (lehoangvan.for.business@gmail.com)
 //Description: Register file with APB interface
 //Language   : System Verilog
 //Model type : Synthesizable
@@ -232,9 +232,7 @@ module ExampleCsr
   assign BCTRL_byte_we[3] = pstrb[3] & BCTRL_write_en;
   //Use the bit range, GenPartialBitRange, to select the strobe index, GenPStrbIndex
   //---------------------------------------
-  //Reg  : ACTRL
-  //Field: RESERVED
-  //Bit  : 31:28
+  //Reg  : ACTRL[31:28] RESERVED 
   //APB Write
   assign ACTRL_next[31:28] = ACTRL_sc_value[31:28];
   //Write to set
@@ -243,9 +241,7 @@ module ExampleCsr
   assign ACTRL_sc_value[31:28] = ACTRL_ivalue_next[31:28];
   //Write from internal operation
   assign ACTRL_ivalue_next[31:28] = ACTRL_RESERVED_iwe? ACTRL_ivalue[31:28]: ACTRL_reg[31:28];
-  //Reg  : ACTRL
-  //Field: BAUND1
-  //Bit  : 27:24
+  //Reg  : ACTRL[27:24] BAUND1 
   //APB Write
   assign ACTRL_next[27:24] = ACTRL_byte_we[3]? pwdata[27:24]: ACTRL_sc_value[27:24];
   //Write to set
@@ -255,9 +251,7 @@ module ExampleCsr
   assign ACTRL_sc_value[27:24] = ACTRL_ivalue_next[27:24];
   //Write from internal operation
   assign ACTRL_ivalue_next[27:24] = ACTRL_reg[27:24];
-  //Reg  : ACTRL
-  //Field: BAUND1
-  //Bit  : 23:16
+  //Reg  : ACTRL[23:16] BAUND1 
   //APB Write
   assign ACTRL_next[23:16] = ACTRL_byte_we[2]? pwdata[23:16]: ACTRL_sc_value[23:16];
   //Write to set
@@ -267,9 +261,7 @@ module ExampleCsr
   assign ACTRL_sc_value[23:16] = ACTRL_ivalue_next[23:16];
   //Write from internal operation
   assign ACTRL_ivalue_next[23:16] = ACTRL_reg[23:16];
-  //Reg  : ACTRL
-  //Field: BAUND0
-  //Bit  : 15:10
+  //Reg  : ACTRL[15:10] BAUND0 
   //APB Write
   assign ACTRL_next[15:10] = ACTRL_byte_we[1]? pwdata[15:10]: ACTRL_sc_value[15:10];
   //Write to set
@@ -279,9 +271,7 @@ module ExampleCsr
   assign ACTRL_sc_value[15:10] = ACTRL_ivalue_next[15:10];
   //Write from internal operation
   assign ACTRL_ivalue_next[15:10] = ACTRL_reg[15:10];
-  //Reg  : ACTRL
-  //Field: RW_W0S
-  //Bit  : 9
+  //Reg  : ACTRL[9] RW_W0S 
   //APB Write
   assign ACTRL_next[9] = ACTRL_byte_we[1]? pwdata[9]: ACTRL_sc_value[9];
   //Write to set
@@ -291,9 +281,7 @@ module ExampleCsr
   //
   //Write from internal operation
   assign ACTRL_ivalue_next[9] = ACTRL_reg[9];
-  //Reg  : ACTRL
-  //Field: RW_W1S
-  //Bit  : 8
+  //Reg  : ACTRL[8] RW_W1S 
   //APB Write
   assign ACTRL_next[8] = ACTRL_byte_we[1]? pwdata[8]: ACTRL_sc_value[8];
   //Write to set
@@ -304,9 +292,7 @@ module ExampleCsr
   //
   //Write from internal operation
   assign ACTRL_ivalue_next[8] = ACTRL_reg[8];
-  //Reg  : ACTRL
-  //Field: RW_W0C
-  //Bit  : 7
+  //Reg  : ACTRL[7] RW_W0C 
   //APB Write
   assign ACTRL_next[7] = ACTRL_byte_we[0]? pwdata[7]: ACTRL_sc_value[7];
   //Write to set
@@ -317,9 +303,7 @@ module ExampleCsr
   //
   //Write from internal operation
   assign ACTRL_ivalue_next[7] = ACTRL_reg[7];
-  //Reg  : ACTRL
-  //Field: RW_W1C
-  //Bit  : 6
+  //Reg  : ACTRL[6] RW_W1C 
   //APB Write
   assign ACTRL_next[6] = ACTRL_byte_we[0]? pwdata[6]: ACTRL_sc_value[6];
   //Write to set
@@ -329,9 +313,7 @@ module ExampleCsr
   //
   //Write from internal operation
   assign ACTRL_ivalue_next[6] = ACTRL_reg[6];
-  //Reg  : ACTRL
-  //Field: RW_WS
-  //Bit  : 5
+  //Reg  : ACTRL[5] RW_WS 
   //APB Write
   assign ACTRL_next[5] = ACTRL_byte_we[0]? pwdata[5]: ACTRL_sc_value[5];
   //Write to set
@@ -341,9 +323,7 @@ module ExampleCsr
   //
   //Write from internal operation
   assign ACTRL_ivalue_next[5] = ACTRL_reg[5];
-  //Reg  : ACTRL
-  //Field: RW_WC
-  //Bit  : 4
+  //Reg  : ACTRL[4] RW_WC 
   //APB Write
   assign ACTRL_next[4] = ACTRL_byte_we[0]? pwdata[4]: ACTRL_sc_value[4];
   //Write to set
@@ -353,9 +333,7 @@ module ExampleCsr
   //
   //Write from internal operation
   assign ACTRL_ivalue_next[4] = ACTRL_reg[4];
-  //Reg  : ACTRL
-  //Field: RW_RS
-  //Bit  : 3
+  //Reg  : ACTRL[3] RW_RS 
   //APB Write
   assign ACTRL_next[3] = ACTRL_byte_we[0]? pwdata[3]: ACTRL_sc_value[3];
   //Write to set
@@ -364,9 +342,7 @@ module ExampleCsr
   assign ACTRL_sc_value[3] = ACTRL_ivalue_next[3];
   //Write from internal operation
   assign ACTRL_ivalue_next[3] = ACTRL_reg[3];
-  //Reg  : ACTRL
-  //Field: RW_RC
-  //Bit  : 2
+  //Reg  : ACTRL[2] RW_RC 
   //APB Write
   assign ACTRL_next[2] = ACTRL_byte_we[0]? pwdata[2]: ACTRL_sc_value[2];
   //Write to set
@@ -375,9 +351,7 @@ module ExampleCsr
   assign ACTRL_sc_value[2] = ACTRL_ivalue_next[2];
   //Write from internal operation
   assign ACTRL_ivalue_next[2] = ACTRL_reg[2];
-  //Reg  : ACTRL
-  //Field: RWI
-  //Bit  : 1
+  //Reg  : ACTRL[1] RWI 
   //APB Write
   assign ACTRL_next[1] = ACTRL_sc_value[1];
   //Write to set
@@ -386,9 +360,7 @@ module ExampleCsr
   assign ACTRL_sc_value[1] = ACTRL_ivalue_next[1];
   //Write from internal operation
   assign ACTRL_ivalue_next[1] = ACTRL_RWI_iwe? ACTRL_ivalue[1]: ACTRL_reg[1];
-  //Reg  : ACTRL
-  //Field: RW
-  //Bit  : 0
+  //Reg  : ACTRL[0] RW 
   //APB Write
   assign ACTRL_next[0] = ACTRL_byte_we[0]? pwdata[0]: ACTRL_sc_value[0];
   //Write to set
@@ -397,9 +369,7 @@ module ExampleCsr
   assign ACTRL_sc_value[0] = ACTRL_ivalue_next[0];
   //Write from internal operation
   assign ACTRL_ivalue_next[0] = ACTRL_reg[0];
-  //Reg  : BCTRL
-  //Field: RESERVED
-  //Bit  : 31:28
+  //Reg  : BCTRL[31:28] RESERVED 
   //APB Write
   assign BCTRL_next[31:28] = BCTRL_sc_value[31:28];
   //Write to set
@@ -408,9 +378,7 @@ module ExampleCsr
   assign BCTRL_sc_value[31:28] = BCTRL_ivalue_next[31:28];
   //Write from internal operation
   assign BCTRL_ivalue_next[31:28] = BCTRL_RESERVED_iwe? BCTRL_ivalue[31:28]: BCTRL_reg[31:28];
-  //Reg  : BCTRL
-  //Field: BAUND3
-  //Bit  : 27:24
+  //Reg  : BCTRL[27:24] BAUND3 
   //APB Write
   assign BCTRL_next[27:24] = BCTRL_byte_we[3]? pwdata[27:24]: BCTRL_sc_value[27:24];
   //Write to set
@@ -419,9 +387,7 @@ module ExampleCsr
   assign BCTRL_sc_value[27:24] = BCTRL_ivalue_next[27:24];
   //Write from internal operation
   assign BCTRL_ivalue_next[27:24] = BCTRL_reg[27:24];
-  //Reg  : BCTRL
-  //Field: BAUND3
-  //Bit  : 23:16
+  //Reg  : BCTRL[23:16] BAUND3 
   //APB Write
   assign BCTRL_next[23:16] = BCTRL_byte_we[2]? pwdata[23:16]: BCTRL_sc_value[23:16];
   //Write to set
@@ -430,9 +396,7 @@ module ExampleCsr
   assign BCTRL_sc_value[23:16] = BCTRL_ivalue_next[23:16];
   //Write from internal operation
   assign BCTRL_ivalue_next[23:16] = BCTRL_reg[23:16];
-  //Reg  : BCTRL
-  //Field: BAUND2
-  //Bit  : 15:8
+  //Reg  : BCTRL[15:8] BAUND2 
   //APB Write
   assign BCTRL_next[15:8] = BCTRL_byte_we[1]? pwdata[15:8]: BCTRL_sc_value[15:8];
   //Write to set
@@ -441,9 +405,7 @@ module ExampleCsr
   assign BCTRL_sc_value[15:8] = BCTRL_ivalue_next[15:8];
   //Write from internal operation
   assign BCTRL_ivalue_next[15:8] = BCTRL_reg[15:8];
-  //Reg  : BCTRL
-  //Field: WO1
-  //Bit  : 7
+  //Reg  : BCTRL[7] WO1 
   //APB Write
   assign BCTRL_next[7] = BCTRL_byte_we[0]? pwdata[7]: BCTRL_sc_value[7];
   //Write to set
@@ -454,9 +416,7 @@ module ExampleCsr
   //
   //Write from internal operation
   assign BCTRL_ivalue_next[7] = BCTRL_reg[7];
-  //Reg  : BCTRL
-  //Field: WO0
-  //Bit  : 6
+  //Reg  : BCTRL[6] WO0 
   //APB Write
   assign BCTRL_next[6] = BCTRL_byte_we[0]? pwdata[6]: BCTRL_sc_value[6];
   //Write to set
@@ -467,9 +427,7 @@ module ExampleCsr
   //
   //Write from internal operation
   assign BCTRL_ivalue_next[6] = BCTRL_reg[6];
-  //Reg  : BCTRL
-  //Field: WOS
-  //Bit  : 5
+  //Reg  : BCTRL[5] WOS 
   //APB Write
   assign BCTRL_next[5] = BCTRL_byte_we[0]? pwdata[5]: BCTRL_sc_value[5];
   //Write to set
@@ -478,9 +436,7 @@ module ExampleCsr
   assign BCTRL_sc_value[5] = BCTRL_ivalue_next[5];
   //Write from internal operation
   assign BCTRL_ivalue_next[5] = BCTRL_reg[5];
-  //Reg  : BCTRL
-  //Field: WOC
-  //Bit  : 4
+  //Reg  : BCTRL[4] WOC 
   //APB Write
   assign BCTRL_next[4] = BCTRL_byte_we[0]? pwdata[4]: BCTRL_sc_value[4];
   //Write to set
@@ -489,9 +445,7 @@ module ExampleCsr
   assign BCTRL_sc_value[4] = BCTRL_ivalue_next[4];
   //Write from internal operation
   assign BCTRL_ivalue_next[4] = BCTRL_reg[4];
-  //Reg  : BCTRL
-  //Field: WO
-  //Bit  : 3
+  //Reg  : BCTRL[3] WO 
   //APB Write
   assign BCTRL_next[3] = BCTRL_byte_we[0]? pwdata[3]: BCTRL_sc_value[3];
   //Write to set
@@ -500,9 +454,7 @@ module ExampleCsr
   assign BCTRL_sc_value[3] = BCTRL_ivalue_next[3];
   //Write from internal operation
   assign BCTRL_ivalue_next[3] = BCTRL_reg[3];
-  //Reg  : BCTRL
-  //Field: ROS
-  //Bit  : 2
+  //Reg  : BCTRL[2] ROS 
   //APB Write
   assign BCTRL_next[2] = BCTRL_sc_value[2];
   //Write to set
@@ -512,9 +464,7 @@ module ExampleCsr
   //
   //Write from internal operation
   assign BCTRL_ivalue_next[2] = BCTRL_ROS_iwe? BCTRL_ivalue[2]: BCTRL_reg[2];
-  //Reg  : BCTRL
-  //Field: ROC
-  //Bit  : 1
+  //Reg  : BCTRL[1] ROC 
   //APB Write
   assign BCTRL_next[1] = BCTRL_sc_value[1];
   //Write to set
@@ -524,9 +474,7 @@ module ExampleCsr
   //
   //Write from internal operation
   assign BCTRL_ivalue_next[1] = BCTRL_ROC_iwe? BCTRL_ivalue[1]: BCTRL_reg[1];
-  //Reg  : BCTRL
-  //Field: RO
-  //Bit  : 0
+  //Reg  : BCTRL[0] RO 
   //APB Write
   assign BCTRL_next[0] = BCTRL_sc_value[0];
   //Write to set

@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python3.8
 
 import sys
 import os
@@ -33,25 +33,38 @@ for spec_cnt in range(1, len([*RegSpec])):
   Monitor_content_regist     = ""
   Monitor_content_collect    = ""
   Monitor_content_task       = ""
+  Scoreboard_content_declare = ""
+  Scoreboard_content_var     = ""
+  Scoreboard_content_create  = ""
+  Scoreboard_content_regist  = ""
+  Scoreboard_content_func    = ""
   
   for reg_cnt in range(1, len([*RegSpec[spec_sheet]])):
     reg_key = [*RegSpec[spec_sheet]][reg_cnt]
     GenRegName        = RegSpec[spec_sheet][reg_key]['Common_Config']['GenRegName']
     GenRegOffsetParam = RegSpec[spec_sheet][reg_key]['Common_Config']['GenRegOffsetParam']
     
-    # Transaction for Monitor
+    # Monitor common content
     Monitor_content_create  += f"  {GenRegName}_monitor co_{GenRegName}_monitor; \n"
     Monitor_content_create  += f"  uvm_analysis_port #({GenRegName}_monitor) ap_{GenRegName}_monitor; \n"
     Monitor_content_regist  += f"    co_{GenRegName}_monitor = {GenRegName}_monitor::type_id::create(\"co_{GenRegName}_monitor\",this); \n"
     Monitor_content_regist  += f"    ap_{GenRegName}_monitor = new(\"ap_{GenRegName}_monitor\", this);	\n"
     Monitor_content_collect += f"      {GenRegName}_collect_data(); \n"
     
+    # Scoreboard common content
+    Scoreboard_content_declare  += f"`uvm_analysis_imp_decl(_frmMonitor_{GenRegName}) \n"
+    Scoreboard_content_create   += f"  uvm_analysis_imp_frmMonitor_{GenRegName} #({GenRegName}_monitor, RegRTL_Scoreboard) aimp_frmMonitor_{GenRegName}; \n"
+    Scoreboard_content_regist   += f"    aimp_frmMonitor_{GenRegName} = new(\"aimp_frmMonitor_{GenRegName}\", this); \n"
+    Scoreboard_content_assign   = ""
+  
     # output logic [REGGEN_DATA_WIDTH-1:0] $GenRegName_reg,
     Interface_content         += f"  logic [31:0] {GenRegName}_reg; \n"
     Transaction_content_create = f"  rand logic [31:0] {GenRegName}_reg; \n"
     Transaction_content_regist = f"    `uvm_field_int({GenRegName}_reg, UVM_ALL_ON) \n"
     Monitor_content_change     = f"vif_RegConfig_IF.{GenRegName}_reg \n"  
     Monitor_content_assign     = f"        co_{GenRegName}_monitor.{GenRegName}_reg = vif_RegConfig_IF.{GenRegName}_reg; \n"
+    Scoreboard_content_var    += f"  logic [31:0] {GenRegName}_reg; \n"
+    Scoreboard_content_assign += f"    {GenRegName}_reg = {GenRegName}_Trans.{GenRegName}_reg; \n"
     
     # output logic $GenRegName_read_en
     for strobe_cnt in range (0, len([*RegSpec[spec_sheet][reg_key]['Common_Config']['RW_Property']])):
@@ -62,6 +75,8 @@ for spec_cnt in range(1, len([*RegSpec])):
         Transaction_content_regist += f"    `uvm_field_int({GenRegName}_read_en, UVM_ALL_ON) \n"
         Monitor_content_change     += f"        or vif_RegConfig_IF.{GenRegName}_read_en \n"  
         Monitor_content_assign     += f"        co_{GenRegName}_monitor.{GenRegName}_read_en = vif_RegConfig_IF.{GenRegName}_read_en; \n"
+        Scoreboard_content_var     += f"  logic {GenRegName}_read_en; \n"
+        Scoreboard_content_assign  += f"    {GenRegName}_read_en = {GenRegName}_Trans.{GenRegName}_read_en; \n"
         break
     
     # output logic [REGGEN_STRB_WIDTH-1:0] $GenRegName_byte_we
@@ -78,6 +93,8 @@ for spec_cnt in range(1, len([*RegSpec])):
         Transaction_content_regist += f"    `uvm_field_int({GenRegName}_byte_we, UVM_ALL_ON) \n"
         Monitor_content_change     += f"        or vif_RegConfig_IF.{GenRegName}_byte_we \n"  
         Monitor_content_assign     += f"        co_{GenRegName}_monitor.{GenRegName}_byte_we = vif_RegConfig_IF.{GenRegName}_byte_we; \n"
+        Scoreboard_content_var     += f"  logic [3:0] {GenRegName}_byte_we; \n"
+        Scoreboard_content_assign  += f"    {GenRegName}_byte_we = {GenRegName}_Trans.{GenRegName}_byte_we; \n"
         break
         
     # input logic [REGGEN_DATA_WIDTH-1:0] $GenRegName_ivalue
@@ -97,6 +114,8 @@ for spec_cnt in range(1, len([*RegSpec])):
         Driver_content_default     += f"        v_RegConfig_IF.{GenRegName}_ivalue = 'h0; \n"
         Monitor_content_change     += f"        or vif_RegConfig_IF.{GenRegName}_ivalue \n"  
         Monitor_content_assign     += f"        co_{GenRegName}_monitor.{GenRegName}_ivalue = vif_RegConfig_IF.{GenRegName}_ivalue; \n"
+        Scoreboard_content_var     += f"  logic [31:0] {GenRegName}_ivalue; \n"
+        Scoreboard_content_assign  += f"    {GenRegName}_ivalue = {GenRegName}_Trans.{GenRegName}_ivalue; \n"
         break  
 
     for field_cnt in range(1, len([*RegSpec[spec_sheet][reg_key]])):
@@ -119,6 +138,8 @@ for spec_cnt in range(1, len([*RegSpec])):
           Driver_content_default     += f"        v_RegConfig_IF.{GenRegName}_{GenRegField}_iwe = 'h0; \n"
           Monitor_content_change     += f"        or vif_RegConfig_IF.{GenRegName}_{GenRegField}_iwe \n"  
           Monitor_content_assign     += f"        co_{GenRegName}_monitor.{GenRegName}_{GenRegField}_iwe = vif_RegConfig_IF.{GenRegName}_{GenRegField}_iwe; \n"
+          Scoreboard_content_var     += f"  logic {GenRegName}_{GenRegField}_iwe; \n"
+          Scoreboard_content_assign  += f"    {GenRegName}_{GenRegField}_iwe = {GenRegName}_Trans.{GenRegName}_{GenRegField}_iwe; \n"
           break
 
       for split_cnt in range(1, len([*RegSpec[spec_sheet][reg_key][field_key]])):
@@ -132,6 +153,8 @@ for spec_cnt in range(1, len([*RegSpec])):
           Transaction_content_regist += f"    `uvm_field_int({GenRegName}_{GenRegField}_{GenPStrbIndex}_w1, UVM_ALL_ON) \n"
           Monitor_content_change     += f"        or vif_RegConfig_IF.{GenRegName}_{GenRegField}_{GenPStrbIndex}_w1 \n"  
           Monitor_content_assign     += f"        co_{GenRegName}_monitor.{GenRegName}_{GenRegField}_{GenPStrbIndex}_w1 = vif_RegConfig_IF.{GenRegName}_{GenRegField}_{GenPStrbIndex}_w1; \n"
+          Scoreboard_content_var     += f"  logic {GenRegName}_{GenRegField}_{GenPStrbIndex}_w1; \n"
+          Scoreboard_content_assign  += f"    {GenRegName}_{GenRegField}_{GenPStrbIndex}_w1 = {GenRegName}_Trans.{GenRegName}_{GenRegField}_{GenPStrbIndex}_w1; \n"
         # output logic $GenRegName_$GenRegField_$GenPStrbIndex_w0
         if 'POW0' in RegSpec[spec_sheet][reg_key][field_key][split_key]['RW_Property']:
           Interface_content          += f"  logic {GenRegName}_{GenRegField}_{GenPStrbIndex}_w0; \n"
@@ -139,6 +162,8 @@ for spec_cnt in range(1, len([*RegSpec])):
           Transaction_content_regist += f"    `uvm_field_int({GenRegName}_{GenRegField}_{GenPStrbIndex}_w0, UVM_ALL_ON) \n"
           Monitor_content_change     += f"        or vif_RegConfig_IF.{GenRegName}_{GenRegField}_{GenPStrbIndex}_w0 \n"  
           Monitor_content_assign     += f"        co_{GenRegName}_monitor.{GenRegName}_{GenRegField}_{GenPStrbIndex}_w0 = vif_RegConfig_IF.{GenRegName}_{GenRegField}_{GenPStrbIndex}_w0; \n"
+          Scoreboard_content_var     += f"  logic {GenRegName}_{GenRegField}_{GenPStrbIndex}_w0; \n"
+          Scoreboard_content_assign  += f"    {GenRegName}_{GenRegField}_{GenPStrbIndex}_w0 = {GenRegName}_Trans.{GenRegName}_{GenRegField}_{GenPStrbIndex}_w0; \n"
           
     Transaction_content += f"""
 class {GenRegName}_monitor extends uvm_sequence_item;
@@ -166,6 +191,12 @@ endclass: {GenRegName}_monitor
       end
     end
   endtask: {GenRegName}_collect_data
+"""
+    
+    Scoreboard_content_func += f"""
+  function void write_frmMonitor_{GenRegName} ({GenRegName}_monitor {GenRegName}_Trans);
+{Scoreboard_content_assign}
+  endfunction
 """
     
     if ivalue_match == 1:      
@@ -235,6 +266,29 @@ endclass: {GenRegName}_monitor
     else:
       line_print += line
   final_path = output_path + "/uvm_comp/RegConfig_Monitor.sv"
+  uvm_final = open(final_path, "w")
+  uvm_final.write(line_print)
+  uvm_final.close()
+  
+  # Create: RegRTL_Scoreboard.sv
+  sample_path = input_path + "/uvm_comp/RegRTL_Scoreboard.sv"
+  uvm_sample = open(sample_path, "r")
+  lines = uvm_sample.readlines()
+  line_print = ""
+  for line in lines:
+    if '// Content declare' in line:
+      line_print += Scoreboard_content_declare
+    elif '// Content internal variables' in line:
+      line_print += Scoreboard_content_var
+    elif '// Content create' in line:
+      line_print += Scoreboard_content_create
+    elif '// Content regist' in line:
+      line_print += Scoreboard_content_regist
+    elif '// Content function' in line:
+      line_print += Scoreboard_content_func
+    else:
+      line_print += line
+  final_path = output_path + "/uvm_comp/RegRTL_Scoreboard.sv"
   uvm_final = open(final_path, "w")
   uvm_final.write(line_print)
   uvm_final.close()

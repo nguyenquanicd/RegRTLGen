@@ -24,7 +24,7 @@ class RegConfig_Transaction extends uvm_sequence_item;
     `uvm_field_int(IWE_value, UVM_ALL_ON)
   `uvm_object_utils_end
   
-  function new (string name = "RegConfig_Transaction");
+  function new(string name = "RegConfig_Transaction");
     super.new(name);
   endfunction: new
   

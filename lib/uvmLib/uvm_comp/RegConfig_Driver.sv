@@ -17,7 +17,7 @@ class RegConfig_Driver extends uvm_driver #(RegConfig_Transaction);
     super.new(name, parent);
   endfunction: new
 
-  function void build_phase (uvm_phase phase);
+  function void build_phase(uvm_phase phase);
     super.build_phase(phase);
     if (!uvm_config_db#(virtual interface RegConfig_Interface)::get(.cntxt(this),
         .inst_name(""),
@@ -30,7 +30,7 @@ class RegConfig_Driver extends uvm_driver #(RegConfig_Transaction);
 
   virtual task run_phase (uvm_phase phase);
     fork
-      get_seq_and_drive ();
+      get_seq_and_drive();
     join
   endtask: run_phase
 
