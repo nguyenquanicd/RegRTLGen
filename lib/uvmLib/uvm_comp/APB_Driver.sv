@@ -18,7 +18,7 @@ class cApbMasterDriver extends uvm_driver #(cApbTransaction);
   //`uvm_component_utils is for non-parameterized classes
   `uvm_component_utils(cApbMasterDriver)
   //3. Class constructor with two arguments
-  // - A string "name"
+  // - A string "name"`uvm_field_int(pready, UVM_ALL_ON)
   // - A class object with data type uvm_component
   function new (string name, uvm_component parent);
     //Call the function new of the base class "uvm_driver"

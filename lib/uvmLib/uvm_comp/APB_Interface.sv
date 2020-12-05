@@ -16,23 +16,24 @@ interface ifApbMaster;
   logic [31:0] pwdata;
   logic [31:0] prdata;
   logic [3:0]  pstrb;
+  logic [2:0]  pprot;
   logic        pready;
   logic        pslverr;
 endinterface: ifApbMaster
 //Interrupt interface 
-interface ifInterrupt;
-  `ifdef INTERRUPT_COM
-    logic ctrl_if;
-  `else
-    logic ctrl_tif;
-    logic ctrl_rif;
-    logic ctrl_pif;
-    logic ctrl_oif;  
-    logic ctrl_fif;
-   `endif
-endinterface: ifInterrupt
-//UART interface
-interface ifUart (input logic pclk, input logic preset_n);
-  logic uart_tx;
-  logic uart_rx;
-endinterface: ifUart
+// Remove interrupt interface ifInterrupt;
+// Remove interrupt   `ifdef INTERRUPT_COM
+// Remove interrupt     logic ctrl_if;
+// Remove interrupt   `else
+// Remove interrupt     logic ctrl_tif;
+// Remove interrupt     logic ctrl_rif;
+// Remove interrupt     logic ctrl_pif;
+// Remove interrupt     logic ctrl_oif;  
+// Remove interrupt     logic ctrl_fif;
+// Remove interrupt    `endif
+// Remove interrupt endinterface: ifInterrupt
+// Remove interrupt //UART interface
+// Remove interrupt interface ifUart (input logic pclk, input logic preset_n);
+// Remove interrupt   logic uart_tx;
+// Remove interrupt   logic uart_rx;
+// Remove interrupt endinterface: ifUart

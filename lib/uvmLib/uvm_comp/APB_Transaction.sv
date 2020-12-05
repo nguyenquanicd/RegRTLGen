@@ -1,4 +1,5 @@
-//--------------------------------------
+\
+ n//--------------------------------------
 //Project:  The UVM environemnt for UART (Universal Asynchronous Receiver Transmitter)
 //Function: APB sequence
 // - Create the APB transaction
@@ -18,6 +19,7 @@ class cApbTransaction extends uvm_sequence_item;
   rand logic [31:0] paddr;
   rand logic [31:0] pwdata;
   rand logic [3:0]  pstrb;
+  rand logic [2:0]  pprot;
   logic [31:0] prdata;
   logic        pslverr;
   //Internal parameter to set the expected delay
@@ -38,6 +40,7 @@ class cApbTransaction extends uvm_sequence_item;
     `uvm_field_int(pwdata, UVM_ALL_ON)
     `uvm_field_int(pstrb, UVM_ALL_ON)
 	`uvm_field_int(pready, UVM_ALL_ON)
+	`uvm_field_int(pprot, UVM_ALL_ON)
     `uvm_field_int(apbDelay, UVM_ALL_ON)
     `uvm_field_int(apbSeqEn, UVM_ALL_ON)
     `uvm_field_int(apbConEn, UVM_ALL_ON)
@@ -49,10 +52,10 @@ class cApbTransaction extends uvm_sequence_item;
   //Show the value of all variable
   virtual task print_apb_seq();
      //`uvm_info(ID, MSG, VERBOSITY)
-     //ID: message tag
+     //ID: message tags
      //MSG message text
      //get_full_name returns the full hierarchical name of the driver object
-    `uvm_info("APB_SEQ", $sformatf("pwrite = %0h, paddr = %0h, pwdata = %0h, pstrb = %0h, prdata = %0h, apbDelay = %0d", pwrite, paddr, pwdata, pstrb, prdata, apbDelay), UVM_LOW);
+    `uvm_info("APB_SEQ", $sformatf("pwrite = %0h, paddr = %0h, pwdata = %0h, pstrb = %0h, pprot = %0h, prdata = %0h, apbDelay = %0d", pwrite, paddr, pwdata, pstrb, pprot, prdata, apbDelay), UVM_LOW);
   endtask: print_apb_seq
 
 endclass: cApbTransaction
