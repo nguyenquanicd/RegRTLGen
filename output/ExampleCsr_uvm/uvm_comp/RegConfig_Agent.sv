@@ -1,31 +1,31 @@
 //--------------------------------------
-//Project: The UVM environemnt for UART (Universal Asynchronous Receiver Transmitter)
-//Function: APB Agent
-//Author:  Pham Thanh Tram, Nguyen Sinh Ton, Doan Duc Hoang, Truong Cong Hoang Viet, Nguyen Hung Quan
+//Project: The UVM environemnt for RegisterRTL
+//Function: Register Config Agent
+//Author:  Nguyen Hung Quan, Le Hoang Van, Tran Huu Duy
 //Page:    VLSI Technology
 //--------------------------------------
-class cApbMasterAgent extends uvm_agent;
-  //Register to Factory
+
+class RegConfig_Agent extends uvm_agent;
+  RegConfig_Driver    co_RegConfig_Driver;
+  RegConfig_Sequencer co_RegConfig_Sequencer;
+  RegConfig_Monitor   co_RegConfig_Monitor;
+
   `uvm_component_utils(cApbMasterAgent)
-  //Declare Sequencer, Driver and Monitor
-  cApbMasterDriver    coApbMasterDriver;
-  cApbMasterSequencer coApbMasterSequencer;
-  cApbMasterMonitor   coApbMasterMonitor;
-  //Constructor
+
   function new(string name = "cApbMasterAgent", uvm_component parent);
       super.new(name, parent);
-  endfunction
-  //Build objects
+  endfunction: new
+
   function void build_phase(uvm_phase phase);
-      super.build_phase(phase);
-      coApbMasterDriver    = cApbMasterDriver::type_id::create("coApbMasterDriver",this);
-      coApbMasterSequencer = cApbMasterSequencer::type_id::create("coApbMasterSequencer",this);
-      coApbMasterMonitor   = cApbMasterMonitor::type_id::create("coApbMasterMonitor",this);
-  endfunction
-  //Connect Driver and Sequencer
+    super.build_phase(phase);
+    co_RegConfig_Driver    = RegConfig_Driver::type_id::create("co_RegConfig_Driver",this);
+    co_RegConfig_Sequencer = RegConfig_Sequencer::type_id::create("co_RegConfig_Sequencer",this);
+    co_RegConfig_Monitor   = RegConfig_Monitor::type_id::create("co_RegConfig_Monitor",this);
+  endfunction: build_phase
+
   function void connect_phase(uvm_phase phase);
-      super.connect_phase(phase);
-      coApbMasterDriver.seq_item_port.connect(coApbMasterSequencer.seq_item_export);
-  endfunction
+    super.connect_phase(phase);
+    co_RegConfig_Driver.seq_item_port.connect(co_RegConfig_Sequencer.seq_item_export);
+  endfunction: connect_phase
     
-endclass
+endclass: RegConfig_Agent

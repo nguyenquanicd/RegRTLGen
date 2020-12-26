@@ -1,7 +1,7 @@
 //--------------------------------------
 //Project: The UVM environemnt for RegisterRTL
 //Function: Register Config Transaction
-//Author:  Nguyen Hung Quan, Le Hoang Van, Le Tan Thinh
+//Author:  Nguyen Hung Quan, Le Hoang Van, Tran Huu Duy
 //Page:    VLSI Technology
 //--------------------------------------
 
@@ -16,7 +16,7 @@ class RegConfig_Transaction extends uvm_sequence_item;
   constraint Upper_cons {Upper_bit inside {[0:31]};};
   constraint Lower_cons {Lower_bit inside {[0:31]};};
   
-  `uvm_object_utils_begin (RegConfig_Transaction)
+  `uvm_object_utils_begin(RegConfig_Transaction)
     `uvm_field_int(Addr, UVM_ALL_ON)
     `uvm_field_int(Data, UVM_ALL_ON)
     `uvm_field_int(Upper_bit, UVM_ALL_ON)

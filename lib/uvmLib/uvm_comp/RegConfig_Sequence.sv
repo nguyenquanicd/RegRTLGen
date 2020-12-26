@@ -1,7 +1,7 @@
 //--------------------------------------
 //Project: The UVM environemnt for RegisterRTL
 //Function: Register Config Sequence
-//Author:  Nguyen Hung Quan, Le Hoang Van, Le Tan Thinh
+//Author:  Nguyen Hung Quan, Le Hoang Van, Tran Huu Duy
 //Page:    VLSI Technology
 //--------------------------------------
 
@@ -17,7 +17,7 @@ class RegConfig_Sequence extends uvm_sequence#(RegConfig_Transaction);
   `uvm_object_utils(RegConfig_Sequence)
   `uvm_declare_p_sequencer(RegConfig_Sequencer)
   
-  function new (string name = "RegConfig_Sequence");
+  function new(string name = "RegConfig_Sequence");
     super.new(name);
     co_RegConfig_Trans = RegConfig_Transaction::type_id::create("co_RegConfig_Trans");
   endfunction: new

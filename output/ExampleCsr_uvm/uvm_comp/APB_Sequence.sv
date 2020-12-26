@@ -1,8 +1,8 @@
 //--------------------------------------
-//Project: The UVM environemnt for UART (Universal Asynchronous Receiver Transmitter)
+//Project: The UVM environemnt for RegisterRTL
 //Function: Common sequences help create the user sequences easily
 //  - User adds more the common sequences in this file
-//Author:  Pham Thanh Tram, Nguyen Sinh Ton, Doan Duc Hoang, Truong Cong Hoang Viet, Nguyen Hung Quan
+//Author:  Nguyen Hung Quan, Le Hoang Van, Tran Huu Duy
 //Page:    VLSI Technology
 //--------------------------------------
 
@@ -10,102 +10,105 @@
 //Write sequence
 //--------------------------------------
 class cApbMasterWriteSeq extends uvm_sequence#(cApbTransaction);
-	`uvm_object_utils(cApbMasterWriteSeq)
-	`uvm_declare_p_sequencer(cApbMasterSequencer)
+  `uvm_object_utils(cApbMasterWriteSeq)
+  `uvm_declare_p_sequencer(cApbMasterSequencer)
   
   cApbTransaction coApbTransaction;
   
   rand logic conEn;
-	rand logic [31:0] addr;
-	rand logic [31:0] data;
-	rand logic [ 3:0] be;	
+  rand logic [31:0] addr;
+  rand logic [31:0] data;
+  rand logic [ 3:0] be; 
+  rand logic [ 2:0] prot;
 
-	function new (string name = "cApbMasterWriteSeq");
-		super.new(name);
-    coApbTransaction = cApbTransaction::type_id::create("coApbTransaction");
-	endfunction
+  function new (string name = "cApbMasterWriteSeq");
+    super.new(name);
+      coApbTransaction = cApbTransaction::type_id::create("coApbTransaction");
+  endfunction
 
-	virtual task body();
-		start_item(coApbTransaction);
-    //coApbTransaction.randomize();
-		assert(coApbTransaction.randomize() with {
+  virtual task body();
+    start_item(coApbTransaction);
+    assert(coApbTransaction.randomize() with {
       coApbTransaction.apbSeqEn  == 1;
       coApbTransaction.apbConEn  == conEn;
-			coApbTransaction.paddr  == addr;
-			coApbTransaction.pwdata == data;
-			coApbTransaction.pstrb  == be;
-			coApbTransaction.pwrite == 1;
-		});
-		finish_item(coApbTransaction);
-	endtask
+      coApbTransaction.paddr  == addr;
+      coApbTransaction.pwdata == data;
+      coApbTransaction.pstrb  == be;
+      coApbTransaction.pprot  == prot;
+      coApbTransaction.pwrite == 1;
+      });
+    finish_item(coApbTransaction);
+  endtask
 endclass
+
 //--------------------------------------
 //Read sequence
 //--------------------------------------
 class cApbMasterReadSeq extends uvm_sequence#(cApbTransaction);
-	`uvm_object_utils(cApbMasterReadSeq)
-	`uvm_declare_p_sequencer(cApbMasterSequencer)
+  `uvm_object_utils(cApbMasterReadSeq)
+  `uvm_declare_p_sequencer(cApbMasterSequencer)
   
   cApbTransaction coApbTransaction;
   
   rand logic conEn;
-	rand logic [31:0] addr;
+  rand logic [31:0] addr;
   rand logic [31:0] expectedReadData;
   rand logic [31:0] mask;
+  rand logic [ 2:0] prot;
   logic [31:0] compareResult;
 
-	function new (string name = "cApbMasterReadSeq");
-		super.new(name);
-    coApbTransaction = cApbTransaction::type_id::create("coApbTransaction");
-	endfunction
+  function new (string name = "cApbMasterReadSeq");
+    super.new(name);
+      coApbTransaction = cApbTransaction::type_id::create("coApbTransaction");
+  endfunction
 
-	virtual task body();
-   
-		start_item(coApbTransaction);
-		assert(coApbTransaction.randomize() with {
+  virtual task body();
+    start_item(coApbTransaction);
+    assert(coApbTransaction.randomize() with {
       coApbTransaction.apbSeqEn  == 1;
       coApbTransaction.apbConEn  == conEn;
-			coApbTransaction.paddr  == addr;
-			coApbTransaction.pwrite == 0;
-		});
-		finish_item(coApbTransaction);
-    //Compare the actual data and the expected data
+      coApbTransaction.paddr  == addr;
+      coApbTransaction.pprot  == prot;
+      coApbTransaction.pwrite == 0;
+      });
+    finish_item(coApbTransaction);
     compareResult = (coApbTransaction.prdata ^ expectedReadData) & mask;
     if (compareResult) begin
       `uvm_error("READ FAIL", $sformatf("Address: %8h, Expected data: %8h, Actual data: %8h, Mask: %8h", addr, expectedReadData, coApbTransaction.prdata, mask));
     end
-	endtask
+  endtask
 endclass
 
 
 //--------------------------------------
 //Read sequence without compare
-//VietHT
 //--------------------------------------
 class cApbMasterWriteSeqNotCmpr extends uvm_sequence#(cApbTransaction);
-	`uvm_object_utils(cApbMasterWriteSeqNotCmpr)
-	`uvm_declare_p_sequencer(cApbMasterSequencer)
+  `uvm_object_utils(cApbMasterWriteSeqNotCmpr)
+  `uvm_declare_p_sequencer(cApbMasterSequencer)
   
   cApbTransaction coApbTransaction;
   
-    rand logic conEn;
-	rand logic [31:0] addr;
-	rand logic [31:0] data;
-    rand logic [31:0] mask;	
+  rand logic conEn;
+  rand logic [31:0] addr;
+  rand logic [31:0] data;
+  rand logic [31:0] mask; 
+  rand logic [ 2:0] prot;
+ 
+  function new (string name = "cApbMasterWriteSeqNotCmpr");
+    super.new(name);
+      coApbTransaction = cApbTransaction::type_id::create("coApbTransaction");
+  endfunction
 
-	function new (string name = "cApbMasterWriteSeqNotCmpr");
-		super.new(name);
-    coApbTransaction = cApbTransaction::type_id::create("coApbTransaction");
-	endfunction
-
-	virtual task body();
-		start_item(coApbTransaction);
-		assert(coApbTransaction.randomize() with {
-            coApbTransaction.apbSeqEn  == 1;
-            coApbTransaction.apbConEn  == conEn;
-			coApbTransaction.paddr  == addr;
-			coApbTransaction.pwrite == 0;
-		});
-		finish_item(coApbTransaction);
-	endtask
+  virtual task body();
+    start_item(coApbTransaction);
+    assert(coApbTransaction.randomize() with {
+      coApbTransaction.apbSeqEn  == 1;
+      coApbTransaction.apbConEn  == conEn;
+      coApbTransaction.paddr  == addr;
+      coApbTransaction.pprot  == prot;
+      coApbTransaction.pwrite == 0;
+      });
+    finish_item(coApbTransaction);
+  endtask
 endclass

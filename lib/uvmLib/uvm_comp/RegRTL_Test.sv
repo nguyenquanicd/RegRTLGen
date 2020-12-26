@@ -1,42 +1,42 @@
 //--------------------------------------
-//Project: The UVM environemnt for UART (Universal Asynchronous Receiver Transmitter)
+//Project: The UVM environemnt for RegisterRTL
 //Function: UVM Testbench
-//Author:  Pham Thanh Tram, Nguyen Sinh Ton, Doan Duc Hoang, Truong Cong Hoang Viet, Nguyen Hung Quan
+//Author:  Nguyen Hung Quan, Le Hoang Van, Tran Huu Duy
 //Page:    VLSI Technology
 //--------------------------------------
-class cTest extends uvm_test;
-  //Register to Factory
-	`uvm_component_utils(cTest)
-  //Declare all instances
-	cEnv coEnv;
-	cVSequence coVSequence;
-  //Constructor
-	function new (string name = "cTest", uvm_component parent = null);
-		super.new(name,parent);
-	endfunction
-  //Build phase
-  //Create all objects by the method type_id::create()
-	function void build_phase(uvm_phase phase);
-		super.build_phase(phase);
-		coEnv = cEnv::type_id::create("coEnv",this);
-		coVSequence = cVSequence::type_id::create("coVSequence",this);
-	endfunction
-  //Run phase
-	task run_phase(uvm_phase phase);
-		super.run_phase(phase);
-		phase.raise_objection(this);
-		fork
+
+class RegRTL_Test extends uvm_test;
+  RegRTL_Env co_RegRTL_Env;
+  RegRTL_Sequence co_RegRTL_Sequence;
+  
+ `uvm_component_utils(RegRTL_Test)
+
+  function new(string name = "RegRTL_Test", uvm_component parent = null);
+    super.new(name,parent);
+  endfunction: new
+
+  function void build_phase(uvm_phase phase);
+    super.build_phase(phase);
+    co_RegRTL_Env = RegRTL_Env::type_id::create("co_RegRTL_Env",this);
+    co_RegRTL_Sequence = RegRTL_Sequence::type_id::create("co_RegRTL_Sequence",this);
+  endfunction: build_phase
+
+  task run_phase(uvm_phase phase);
+    super.run_phase(phase);
+    phase.raise_objection(this);
+    fork
       begin
-			  coVSequence.start(coEnv.coVSequencer);
+        co_RegRTL_Sequence.start(co_RegRTL_Env.co_RegRTL_Sequencer);
       end
-			begin
-				#1ms;
+      
+      begin
+        #1ms;
         $display("#---------------------------------");
-				`uvm_warning("CTEST WARNING", "TIMEOUT TIMEOUT TIMEOUT TIMEOUT TIMEOUT!!!")
+        `uvm_warning("RegRTL_Test WARNING", "TIMEOUT TIMEOUT TIMEOUT TIMEOUT TIMEOUT!!!")
         $display("#---------------------------------");
-			end
-		join_any
-		disable fork;
-		phase.drop_objection(this);
-	endtask
-endclass
+      end
+    join_any
+    disable fork;
+    phase.drop_objection(this);
+  endtask: run_phase
+endclass: RegRTL_Test

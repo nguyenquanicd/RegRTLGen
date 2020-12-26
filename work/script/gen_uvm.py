@@ -38,6 +38,7 @@ for spec_cnt in range(1, len([*RegSpec])):
   Scoreboard_content_create  = ""
   Scoreboard_content_regist  = ""
   Scoreboard_content_func    = ""
+  Env_content_connect        = ""
   
   for reg_cnt in range(1, len([*RegSpec[spec_sheet]])):
     reg_key = [*RegSpec[spec_sheet]][reg_cnt]
@@ -56,7 +57,10 @@ for spec_cnt in range(1, len([*RegSpec])):
     Scoreboard_content_create   += f"  uvm_analysis_imp_frmMonitor_{GenRegName} #({GenRegName}_monitor, RegRTL_Scoreboard) aimp_frmMonitor_{GenRegName}; \n"
     Scoreboard_content_regist   += f"    aimp_frmMonitor_{GenRegName} = new(\"aimp_frmMonitor_{GenRegName}\", this); \n"
     Scoreboard_content_assign   = ""
-  
+    
+    # Env common connect
+    Env_content_connect += f"    co_RegConfig_Agent.co_RegConfig_Monitor.ap_{GenRegName}_monitor.connect(co_RegRTL_Scoreboard.aimp_frmMonitor_{GenRegName}); \n"
+    
     # output logic [REGGEN_DATA_WIDTH-1:0] $GenRegName_reg,
     Interface_content         += f"  logic [31:0] {GenRegName}_reg; \n"
     Transaction_content_create = f"  rand logic [31:0] {GenRegName}_reg; \n"
@@ -169,11 +173,11 @@ for spec_cnt in range(1, len([*RegSpec])):
 class {GenRegName}_monitor extends uvm_sequence_item;
   
 {Transaction_content_create}
-  `uvm_object_utils_begin ({GenRegName}_monitor)
+  `uvm_object_utils_begin({GenRegName}_monitor)
 {Transaction_content_regist}
   `uvm_object_utils_end
   
-  function new (string name = "{GenRegName}_monitor");
+  function new(string name = "{GenRegName}_monitor");
     super.new(name);
   endfunction: new
 
@@ -194,7 +198,7 @@ endclass: {GenRegName}_monitor
 """
     
     Scoreboard_content_func += f"""
-  function void write_frmMonitor_{GenRegName} ({GenRegName}_monitor {GenRegName}_Trans);
+  function void write_frmMonitor_{GenRegName}({GenRegName}_monitor {GenRegName}_Trans);
 {Scoreboard_content_assign}
   endfunction
 """
@@ -289,6 +293,21 @@ endclass: {GenRegName}_monitor
     else:
       line_print += line
   final_path = output_path + "/uvm_comp/RegRTL_Scoreboard.sv"
+  uvm_final = open(final_path, "w")
+  uvm_final.write(line_print)
+  uvm_final.close()
+  
+  # Create: RegRTL_Env.sv
+  sample_path = input_path + "/uvm_comp/RegRTL_Env.sv"
+  uvm_sample = open(sample_path, "r")
+  lines = uvm_sample.readlines()
+  line_print = ""
+  for line in lines:
+    if '// Content connect' in line:
+      line_print += Env_content_connect
+    else:
+      line_print += line
+  final_path = output_path + "/uvm_comp/RegRTL_Env.sv"
   uvm_final = open(final_path, "w")
   uvm_final.write(line_print)
   uvm_final.close()

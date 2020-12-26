@@ -1,7 +1,7 @@
 //--------------------------------------
 //Project: The UVM environemnt for RegisterRTL
 //Function: Register Config S
-//Author:  Nguyen Hung Quan, Le Hoang Van, Le Tan Thinh
+//Author:  Nguyen Hung Quan, Le Hoang Van, Tran Huu Duy
 //Page:    VLSI Technology
 //--------------------------------------
 

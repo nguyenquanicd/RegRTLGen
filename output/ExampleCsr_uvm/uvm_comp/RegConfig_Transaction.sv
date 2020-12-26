@@ -1,7 +1,7 @@
 //--------------------------------------
 //Project: The UVM environemnt for RegisterRTL
 //Function: Register Config Transaction
-//Author:  Nguyen Hung Quan, Le Hoang Van, Le Tan Thinh
+//Author:  Nguyen Hung Quan, Le Hoang Van, Tran Huu Duy
 //Page:    VLSI Technology
 //--------------------------------------
 
@@ -16,7 +16,7 @@ class RegConfig_Transaction extends uvm_sequence_item;
   constraint Upper_cons {Upper_bit inside {[0:31]};};
   constraint Lower_cons {Lower_bit inside {[0:31]};};
   
-  `uvm_object_utils_begin (RegConfig_Transaction)
+  `uvm_object_utils_begin(RegConfig_Transaction)
     `uvm_field_int(Addr, UVM_ALL_ON)
     `uvm_field_int(Data, UVM_ALL_ON)
     `uvm_field_int(Upper_bit, UVM_ALL_ON)
@@ -51,7 +51,7 @@ class ACTRL_monitor extends uvm_sequence_item;
   rand logic ACTRL_BAUND0_1_w0; 
   rand logic ACTRL_RWI_iwe; 
 
-  `uvm_object_utils_begin (ACTRL_monitor)
+  `uvm_object_utils_begin(ACTRL_monitor)
     `uvm_field_int(ACTRL_reg, UVM_ALL_ON) 
     `uvm_field_int(ACTRL_byte_we, UVM_ALL_ON) 
     `uvm_field_int(ACTRL_ivalue, UVM_ALL_ON) 
@@ -63,7 +63,7 @@ class ACTRL_monitor extends uvm_sequence_item;
 
   `uvm_object_utils_end
   
-  function new (string name = "ACTRL_monitor");
+  function new(string name = "ACTRL_monitor");
     super.new(name);
   endfunction: new
 
@@ -80,7 +80,7 @@ class BCTRL_monitor extends uvm_sequence_item;
   rand logic BCTRL_ROC_iwe; 
   rand logic BCTRL_RO_iwe; 
 
-  `uvm_object_utils_begin (BCTRL_monitor)
+  `uvm_object_utils_begin(BCTRL_monitor)
     `uvm_field_int(BCTRL_reg, UVM_ALL_ON) 
     `uvm_field_int(BCTRL_read_en, UVM_ALL_ON) 
     `uvm_field_int(BCTRL_byte_we, UVM_ALL_ON) 
@@ -92,7 +92,7 @@ class BCTRL_monitor extends uvm_sequence_item;
 
   `uvm_object_utils_end
   
-  function new (string name = "BCTRL_monitor");
+  function new(string name = "BCTRL_monitor");
     super.new(name);
   endfunction: new
 

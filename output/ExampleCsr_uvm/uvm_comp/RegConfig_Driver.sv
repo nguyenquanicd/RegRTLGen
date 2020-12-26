@@ -1,11 +1,11 @@
 //--------------------------------------
 //Project: The UVM environemnt for RegisterRTL
 //Function: Register Config Driver
-//Author:  Nguyen Hung Quan, Le Hoang Van, Le Tan Thinh
+//Author:  Nguyen Hung Quan, Le Hoang Van, Tran Huu Duy
 //Page:    VLSI Technology
 //--------------------------------------
 
-class RegConfig_Driver extends uvm_driver #(RegConfig_Transaction);
+class RegConfig_Driver extends uvm_driver#(RegConfig_Transaction);
 
   virtual RegConfig_Interface v_RegConfig_IF;
   RegConfig_Transaction Config_Packet;
@@ -13,7 +13,7 @@ class RegConfig_Driver extends uvm_driver #(RegConfig_Transaction);
   
   `uvm_component_utils(RegConfig_Driver)
   
-  function new (string name, uvm_component parent);
+  function new(string name, uvm_component parent);
     super.new(name, parent);
   endfunction: new
 
@@ -28,7 +28,7 @@ class RegConfig_Driver extends uvm_driver #(RegConfig_Transaction);
     `uvm_info(get_full_name(), "Build phase completed.", UVM_LOW)
   endfunction: build_phase
 
-  virtual task run_phase (uvm_phase phase);
+  virtual task run_phase(uvm_phase phase);
     fork
       get_seq_and_drive();
     join
@@ -42,7 +42,7 @@ class RegConfig_Driver extends uvm_driver #(RegConfig_Transaction);
     end
   endtask: get_seq_and_drive
 
-  virtual task convert_seq2config (RegConfig_Transaction Config_Trans);
+  virtual task convert_seq2config(RegConfig_Transaction Config_Trans);
     Driver_IWE[31] = Config_Trans.IWE_value if ((Config_Trans.Lower_bit <= 31) && (31 <= Config_Trans.Upper_bit)) else 0;
     Driver_IWE[30] = Config_Trans.IWE_value if ((Config_Trans.Lower_bit <= 30) && (30 <= Config_Trans.Upper_bit)) else 0;
     Driver_IWE[29] = Config_Trans.IWE_value if ((Config_Trans.Lower_bit <= 29) && (29 <= Config_Trans.Upper_bit)) else 0;

@@ -1,18 +1,22 @@
 //--------------------------------------
 //Project: The UVM environemnt for RegisterRTL
-//Function: Register Config Monitor
-//Author:  Nguyen Hung Quan, Le Hoang Van, Le Tan Thinh
+//Function: Register Config Scoreboard
+//Author:  Nguyen Hung Quan, Le Hoang Van, Tran Huu Duy
 //Page:    VLSI Technology
 //--------------------------------------
 
+`uvm_analysis_imp_decl(_transAPB)
+`uvm_analysis_imp_decl(_resetAPB)
 `uvm_analysis_imp_decl(_frmMonitor_ACTRL) 
 `uvm_analysis_imp_decl(_frmMonitor_BCTRL) 
 
 class RegRTL_Scoreboard extends uvm_scoreboard;
-
+  uvm_analysis_imp_transAPB #(cApbTransaction, RegRTL_Scoreboard) aimp_transAPB;
+  uvm_analysis_imp_resetAPB #(logic, RegRTL_Scoreboard) aimp_resetAPB;
   uvm_analysis_imp_frmMonitor_ACTRL #(ACTRL_monitor, RegRTL_Scoreboard) aimp_frmMonitor_ACTRL; 
   uvm_analysis_imp_frmMonitor_BCTRL #(BCTRL_monitor, RegRTL_Scoreboard) aimp_frmMonitor_BCTRL; 
   
+  bit rst_flg;
   logic [31:0] ACTRL_reg; 
   logic [3:0] ACTRL_byte_we; 
   logic [31:0] ACTRL_ivalue; 
@@ -38,12 +42,27 @@ class RegRTL_Scoreboard extends uvm_scoreboard;
   
   function void build_phase(uvm_phase phase);
     super.build_phase(phase);
+    aimp_transAPB = new("aimp_transAPB", this);
+    aimp_resetAPB = new("aimp_resetAPB", this);
     aimp_frmMonitor_ACTRL = new("aimp_frmMonitor_ACTRL", this); 
     aimp_frmMonitor_BCTRL = new("aimp_frmMonitor_BCTRL", this); 
  endfunction: build_phase
   
+  function void write_resetAPB (logic preset_n);
+   if (~preset_n) begin
+    rst_flg = 1'b1;
+    `uvm_info("RegRTL RESET", $sformatf("[%t] preset_n signal is acting", $time), UVM_LOW)
+   end
+   else begin
+    rst_flg = 1'b0;
+   end
+  endfunction
+  
+  function void write_transAPB(cApbTransaction TransAPB);
+    `uvm_info("RegRTL APB", $sformatf("[%t] APB transaction", $time), UVM_LOW)
+  endfunction
 
-  function void write_frmMonitor_ACTRL (ACTRL_monitor ACTRL_Trans);
+  function void write_frmMonitor_ACTRL(ACTRL_monitor ACTRL_Trans);
     ACTRL_reg = ACTRL_Trans.ACTRL_reg; 
     ACTRL_byte_we = ACTRL_Trans.ACTRL_byte_we; 
     ACTRL_ivalue = ACTRL_Trans.ACTRL_ivalue; 
@@ -55,7 +74,7 @@ class RegRTL_Scoreboard extends uvm_scoreboard;
 
   endfunction
 
-  function void write_frmMonitor_BCTRL (BCTRL_monitor BCTRL_Trans);
+  function void write_frmMonitor_BCTRL(BCTRL_monitor BCTRL_Trans);
     BCTRL_reg = BCTRL_Trans.BCTRL_reg; 
     BCTRL_read_en = BCTRL_Trans.BCTRL_read_en; 
     BCTRL_byte_we = BCTRL_Trans.BCTRL_byte_we; 

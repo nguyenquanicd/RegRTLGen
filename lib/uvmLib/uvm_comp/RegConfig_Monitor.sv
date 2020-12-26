@@ -1,7 +1,7 @@
 //--------------------------------------
 //Project: The UVM environemnt for RegisterRTL
 //Function: Register Config Monitor
-//Author:  Nguyen Hung Quan, Le Hoang Van, Le Tan Thinh
+//Author:  Nguyen Hung Quan, Le Hoang Van, Tran Huu Duy
 //Page:    VLSI Technology
 //--------------------------------------
 
@@ -12,14 +12,14 @@ class RegConfig_Monitor extends uvm_monitor;
 
   `uvm_component_utils(RegConfig_Monitor)
   
-  function new (string name = "RegConfig_Monitor", uvm_component parent = null);
+  function new(string name = "RegConfig_Monitor", uvm_component parent = null);
     super.new(name,parent);
   endfunction: new
 
   function void build_phase(uvm_phase phase);
     super.build_phase(phase);
-    if(!uvm_config_db#(virtual interface ifApbMaster)::get(this,"","vif_RegConfig_IF",vif_RegConfig_IF)) begin
-      `uvm_error("cApbMasterDriver","Can NOT get vif_RegConfig_IF!!!")
+    if(!uvm_config_db#(virtual interface RegConfig_Interface)::get(this,"","vif_RegConfig_IF",vif_RegConfig_IF)) begin
+      `uvm_error("RegConfig_Driver","Can NOT get vif_RegConfig_IF!!!")
     end
     
     // Content regist

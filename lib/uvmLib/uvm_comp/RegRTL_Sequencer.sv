@@ -1,27 +1,22 @@
 //--------------------------------------
-//Project: The UVM environemnt for UART (Universal Asynchronous Receiver Transmitter)
-//Function: Sequencer wraps Scoreboard, APB Agents
-//Author:  Pham Thanh Tram, Nguyen Sinh Ton, Doan Duc Hoang, Truong Cong Hoang Viet, Nguyen Hung Quan
+//Project: The UVM environemnt for RegisterRTL
+//Function: Sequencer wraps Scoreboard, APB Agent, Register Config Agent
+//Author:  Nguyen Hung Quan, Le Hoang Van, Tran Huu Duy
 //Page:    VLSI Technology
 //--------------------------------------
-class cVSequencer extends uvm_sequencer#(cApbTransaction);
-  //Register to Factory
-	`uvm_component_utils(cVSequencer)
-  //Declare all used instances
-	cApbMasterAgent coApbMasterAgentTx;
-	cApbMasterAgent coApbMasterAgentRx;
-	cScoreboard coScoreboard;
-  //
-  // TODO: component must have variable "parent"
-  // object must not have veriable "parent" (refer to class cVSequence) 
-	function new (string name = "cVSequencer", uvm_component parent = null);
-		super.new(name,parent);
-    //Add more code if any
-	endfunction
 
-	function void build_phase(uvm_phase phase);
-		super.build_phase(phase);
-    //Add more code if any
-	endfunction
+class RegRTL_Sequencer extends uvm_sequencer#(cApbTransaction);
+  cApbMasterAgent coApbMasterAgent;
+  RegConfig_Agent co_RegConfig_Agent;
+  RegRTL_Scoreboard co_RegRTL_Scoreboard;
 
-endclass
+  `uvm_component_utils(RegRTL_Sequencer)
+
+  function new(string name = "RegRTL_Sequencer", uvm_component parent = null);
+    super.new(name,parent);
+  endfunction: new
+
+  function void build_phase(uvm_phase phase);
+    super.build_phase(phase);
+  endfunction: void
+endclass: RegRTL_Sequencer
