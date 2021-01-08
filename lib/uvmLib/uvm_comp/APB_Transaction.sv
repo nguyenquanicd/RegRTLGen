@@ -17,6 +17,7 @@ class cApbTransaction extends uvm_sequence_item;
   rand logic [2:0]  pprot;
   logic [31:0] prdata;
   logic        pslverr;
+  rand logic wprot_en;
   //Internal parameter to set the expected delay
   rand logic apbSeqEn;
   rand logic apbConEn;
@@ -30,11 +31,14 @@ class cApbTransaction extends uvm_sequence_item;
     `uvm_field_int(paddr, UVM_ALL_ON)
     `uvm_field_int(pwdata, UVM_ALL_ON)
     `uvm_field_int(pstrb, UVM_ALL_ON)
-    `uvm_field_int(pready, UVM_ALL_ON)
     `uvm_field_int(pprot, UVM_ALL_ON)
-    `uvm_field_int(apbDelay, UVM_ALL_ON)
+    `uvm_field_int(prdata, UVM_ALL_ON)
+    `uvm_field_int(pslverr, UVM_ALL_ON)
+    `uvm_field_int(wprot_en, UVM_ALL_ON)
     `uvm_field_int(apbSeqEn, UVM_ALL_ON)
     `uvm_field_int(apbConEn, UVM_ALL_ON)
+    `uvm_field_int(apbDelay, UVM_ALL_ON)
+    `uvm_field_int(pready, UVM_ALL_ON)
   `uvm_object_utils_end
   //Constructor
   function new (string name = "cApbTransaction");

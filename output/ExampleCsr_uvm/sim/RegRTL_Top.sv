@@ -1,124 +1,105 @@
 //--------------------------------------
-//Project: The UVM environemnt for UART (Universal Asynchronous Receiver Transmitter)
-//Function:  The most top of UVM env connected all components (DUT, UVM components and checkers)
-//   via the interfaces and signals
-//   Clock and reset generator is created in this file
-//Author:  Pham Thanh Tram, Nguyen Sinh Ton, Doan Duc Hoang, Truong Cong Hoang Viet, Nguyen Hung Quan
+//Project: The UVM environemnt for RegisterRTL
+//Function: APB Monitor
+//Author:  Nguyen Hung Quan, Le Hoang Van, Tran Huu Duy
 //Page:    VLSI Technology
 //--------------------------------------
-`define UART0_CLOCK_CYCLE 50
-`define UART1_CLOCK_CYCLE 86
+
+`define CLOCK_CYCLE 50
 //Include the UVM library
 `include "uvm_pkg.sv"
 `include "uvm_macros.svh"
-`include "../uvm_comp/uMacro.svh"
+`include "RegRTL_Macro.svh"
 //
 //Most TOP module
 //
-module testTop;
+module RegRTL_Top;
   //Import UVM package
   import uvm_pkg::*;
   //Include all used classes
-  `include "../uvm_comp/cApbTransaction.sv"
-  `include "../uvm_comp/cApbMasterDriver.sv"
-  `include "../uvm_comp/cScoreboard.sv"
-  `include "../uvm_comp/cApbMasterMonitor.sv"
-  `include "../uvm_comp/cApbMasterSequencer.sv"
-  `include "../uvm_comp/cApbMasterAgent.sv"
-  `include "../uvm_comp/cVSequencer.sv"
-  `include "../uvm_comp/cCommonSequence.sv" //Add more common sequences at here 
-  `include "../uvm_comp/cVSequence.sv" //Create the TEST PATTERN at here
-  `include "../uvm_comp/cEnv.sv"
-  `include "../uvm_comp/cTest.sv"
-  //Internal signals
-  wire uart_0to1, uart_1to0;
+  `include "APB_Agent.sv"
+  `include "APB_Driver.sv"
+  `include "APB_Interface.sv"
+  `include "APB_Monitor.sv"
+  `include "APB_Sequencer.sv"
+  `include "APB_Sequence.sv"
+  `include "APB_Transaction.sv"
+  
+  `include "RegConfig_Agent.sv"
+  `include "RegConfig_Driver.sv"
+  `include "RegConfig_Interface.sv"
+  `include "RegConfig_Monitor.sv"
+  `include "RegConfig_Sequencer.sv"
+  `include "RegConfig_Sequence.sv"
+  `include "RegConfig_Transaction.sv"
+  
+  `include "RegRTL_Env.sv"
+  `include "RegRTL_Scoreboard.sv"
+  `include "RegRTL_Sequencer.sv"
+  `include "RegRTL_Sequence.sv"
+  `include "RegRTL_Test.sv"
+  
   //Interface declaration
-  ifApbMaster vifApbMaster_Tx();
-  ifApbMaster vifApbMaster_Rx();
-  ifInterrupt vifInterrupt_Tx();
-  ifInterrupt vifInterrupt_Rx();
-  //
+  ifApbMaster vifApbMaster_Top();
+  RegConfig_Interface vRegConfig_Interface_Top();
+
   //Clock generator
   //Create 2 asynchronous clock to test
-  //
-  reg uart0_clk = 1'b0;
-  reg uart1_clk = 1'b0;
-  always #(`UART0_CLOCK_CYCLE/2) uart0_clk = ~uart0_clk;
-  always #(`UART1_CLOCK_CYCLE/2) uart1_clk = ~uart1_clk;
-  assign vifApbMaster_Tx.pclk = uart0_clk;
-  assign vifApbMaster_Rx.pclk = uart1_clk;
-  //
+  reg apb_clk = 1'b0;
+  always #(`CLOCK_CYCLE/2) apb_clk = ~apb_clk;
+  assign vifApbMaster_Top.pclk = apb_clk;
+
   //Reset generator
   //Only reset one time when starting the simulation
-  //
   reg reset_n;
   initial begin
     reset_n = 1'b0;
-    #(`UART0_CLOCK_CYCLE + `UART1_CLOCK_CYCLE)
+    #(`CLOCK_CYCLE)
     reset_n = 1'b1;
   end
-  assign vifApbMaster_Tx.preset_n = reset_n;
-  assign vifApbMaster_Rx.preset_n = reset_n;
-  //Checker instances 
-  apb_protocol_checker_top apb_protocol_checker_top();
-  uart_protocol_checker_top uart_protocol_checker_top();
+  assign vifApbMaster_Top.preset_n = reset_n;
+
   //TOP DUT instance
-  dut_top dut_top(
-     //UART 0 connection
-    .pclk_0(vifApbMaster_Tx.pclk),
-    .preset_n_0(vifApbMaster_Tx.preset_n),
-    .pwrite_0(vifApbMaster_Tx.pwrite),
-    .psel_0(vifApbMaster_Tx.psel), 
-    .penable_0(vifApbMaster_Tx.penable),
-    .paddr_0(vifApbMaster_Tx.paddr),
-    .pwdata_0(vifApbMaster_Tx.pwdata),
-    .pstrb_0(vifApbMaster_Tx.pstrb), 
-    .prdata_0(vifApbMaster_Tx.prdata),
-    .pready_0(vifApbMaster_Tx.pready),
-    .pslverr_0(vifApbMaster_Tx.pslverr),
-    `ifdef INTERRUPT_COM
-      .ctrl_if_0(vifInterrupt_Tx.ctrl_if),
-    `else
-      .ctrl_tif_0(vifInterrupt_Tx.ctrl_tif),
-      .ctrl_rif_0(vifInterrupt_Tx.ctrl_rif),
-      .ctrl_pif_0(vifInterrupt_Tx.ctrl_pif),
-      .ctrl_oif_0(vifInterrupt_Tx.ctrl_oif),
-      .ctrl_fif_0(vifInterrupt_Tx.ctrl_fif),
-    `endif
-    //UART 1 connection
-    .pclk_1(vifApbMaster_Rx.pclk),
-    .preset_n_1(vifApbMaster_Rx.preset_n),
-    .pwrite_1(vifApbMaster_Rx.pwrite),
-    .psel_1(vifApbMaster_Rx.psel), 
-    .penable_1(vifApbMaster_Rx.penable),
-    .paddr_1(vifApbMaster_Rx.paddr),
-    .pwdata_1(vifApbMaster_Rx.pwdata),
-    .pstrb_1(vifApbMaster_Rx.pstrb), 
-    .prdata_1(vifApbMaster_Rx.prdata),
-    .pready_1(vifApbMaster_Rx.pready),
-    .pslverr_1(vifApbMaster_Rx.pslverr),
-    `ifdef INTERRUPT_COM
-       .ctrl_if_1(vifInterrupt_Rx.ctrl_if),
-    `else
-       .ctrl_tif_1(vifInterrupt_Rx.ctrl_tif),
-       .ctrl_rif_1(vifInterrupt_Rx.ctrl_rif),
-       .ctrl_pif_1(vifInterrupt_Rx.ctrl_pif),
-       .ctrl_oif_1(vifInterrupt_Rx.ctrl_oif),
-       .ctrl_fif_1(vifInterrupt_Rx.ctrl_fif),
-    `endif
-    //To UART protocol checker
-    .uart_0to1(uart_0to1),
-    .uart_1to0(uart_1to0)
+  ExampleCsr ExampleCsr( 
+     //RegConfig Interface
+    .ACTRL_reg(vRegConfig_Interface_Top.ACTRL_reg), 
+    .ACTRL_byte_we(vRegConfig_Interface_Top.ACTRL_byte_we), 
+    .ACTRL_ivalue(vRegConfig_Interface_Top.ACTRL_ivalue), 
+    .ACTRL_RESERVED_iwe(vRegConfig_Interface_Top.ACTRL_RESERVED_iwe), 
+    .ACTRL_BAUND1_3_w1(vRegConfig_Interface_Top.ACTRL_BAUND1_3_w1), 
+    .ACTRL_BAUND1_2_w1(vRegConfig_Interface_Top.ACTRL_BAUND1_2_w1), 
+    .ACTRL_BAUND0_1_w0(vRegConfig_Interface_Top.ACTRL_BAUND0_1_w0), 
+    .ACTRL_RWI_iwe(vRegConfig_Interface_Top.ACTRL_RWI_iwe), 
+    .BCTRL_reg(vRegConfig_Interface_Top.BCTRL_reg), 
+    .BCTRL_read_en(vRegConfig_Interface_Top.BCTRL_read_en), 
+    .BCTRL_byte_we(vRegConfig_Interface_Top.BCTRL_byte_we), 
+    .BCTRL_ivalue(vRegConfig_Interface_Top.BCTRL_ivalue), 
+    .BCTRL_RESERVED_iwe(vRegConfig_Interface_Top.BCTRL_RESERVED_iwe), 
+    .BCTRL_ROS_iwe(vRegConfig_Interface_Top.BCTRL_ROS_iwe), 
+    .BCTRL_ROC_iwe(vRegConfig_Interface_Top.BCTRL_ROC_iwe), 
+    .BCTRL_RO_iwe(vRegConfig_Interface_Top.BCTRL_RO_iwe), 
+     //APB Interface
+    .pclk(vifApbMaster_Top.pclk),
+    .preset_n(vifApbMaster_Top.preset_n),
+    .pwrite(vifApbMaster_Top.pwrite),
+    .psel(vifApbMaster_Top.psel), 
+    .penable(vifApbMaster_Top.penable),
+    .paddr(vifApbMaster_Top.paddr),
+    .pwdata(vifApbMaster_Top.pwdata),
+    .pstrb(vifApbMaster_Top.pstrb), 
+    .prdata(vifApbMaster_Top.prdata),
+    .pready(vifApbMaster_Top.pready),
+    .pslverr(vifApbMaster_Top.pslverr),
+    .pprot(vifApbMaster_Top.pprot),
+    .write_protect_en(vifApbMaster_Top.wprot_en)
   );
   //Interface connection
   //Connect TOP DUT to UVM components
   initial begin
     //Connect APB interface
-    uvm_config_db#(virtual interface ifApbMaster)::set(null,"uvm_test_top.coEnv.coApbMasterAgentTx*","vifApbMaster",vifApbMaster_Tx);
-    uvm_config_db#(virtual interface ifApbMaster)::set(null,"uvm_test_top.coEnv.coApbMasterAgentRx*","vifApbMaster",vifApbMaster_Rx);
-    //Connect Interrupt interface
-    uvm_config_db#(virtual interface ifInterrupt)::set(null,"uvm_test_top.coEnv.coApbMasterAgentTx*","vifInterrupt",vifInterrupt_Tx);
-    uvm_config_db#(virtual interface ifInterrupt)::set(null,"uvm_test_top.coEnv.coApbMasterAgentRx*","vifInterrupt",vifInterrupt_Rx);
+    uvm_config_db#(virtual interface ifApbMaster)::set(null,"uvm_test_top.RegRTL_Env.coApbMasterAgent*","vifApbMaster",vifApbMaster_Top);
+    //Connect RegConfig interface
+    uvm_config_db#(virtual interface RegConfig_Interface)::set(null,"uvm_test_top.RegRTL_Env.co_RegConfig_Agent*","vif_RegConfig_IF",vRegConfig_Interface_Top);
   end
   //Run the test pattern
   initial begin

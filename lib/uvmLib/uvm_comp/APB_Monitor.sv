@@ -52,12 +52,13 @@ class cApbMasterMonitor extends uvm_monitor;
         #1ps
         if(vifApbMaster.psel && vifApbMaster.penable && vifApbMaster.pready) begin
           //Get APB transaction on APB interface
-          coApbTransaction.paddr[31:0] =  vifApbMaster.paddr[31:0];
-          coApbTransaction.pstrb[3:0] = vifApbMaster.pstrb[3:0];
-          coApbTransaction.pwrite = vifApbMaster.pwrite;
-          coApbTransaction.pwdata[31:0] =  vifApbMaster.pwdata[31:0];
-          coApbTransaction.prdata[31:0] =  vifApbMaster.prdata[31:0];
-          coApbTransaction.pprot[2:0] =  vifApbMaster.pprot[2:0];
+          coApbTransaction.paddr[31:0]  = vifApbMaster.paddr[31:0];
+          coApbTransaction.pstrb[3:0]   = vifApbMaster.pstrb[3:0];
+          coApbTransaction.pwrite       = vifApbMaster.pwrite;
+          coApbTransaction.pwdata[31:0] = vifApbMaster.pwdata[31:0];
+          coApbTransaction.prdata[31:0] = vifApbMaster.prdata[31:0];
+          coApbTransaction.pprot[2:0]   = vifApbMaster.pprot[2:0];
+          coApbTransaction.wprot_en     = vifApbMaster.wprot_en;
           //Send the transaction to analysis port which is connected to Scoreboard
           ap_toScoreboard.write(coApbTransaction);
         end

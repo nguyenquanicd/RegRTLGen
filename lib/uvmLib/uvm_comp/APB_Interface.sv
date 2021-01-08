@@ -18,4 +18,5 @@ interface ifApbMaster;
   logic [2:0]  pprot;
   logic        pready;
   logic        pslverr;
+  logic wprot_en;
 endinterface: ifApbMaster

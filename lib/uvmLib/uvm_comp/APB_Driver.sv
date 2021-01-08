@@ -101,6 +101,8 @@ class cApbMasterDriver extends uvm_driver #(cApbTransaction);
       uart_vifApbMaster.paddr[31:0]  = userApbTransaction.paddr[31:0];
       uart_vifApbMaster.pwdata[31:0] = userApbTransaction.pwdata[31:0];
       uart_vifApbMaster.pstrb[3:0]   = userApbTransaction.pstrb[3:0];
+      uart_vifApbMaster.pprot[2:0]   = userApbTransaction.pprot[2:0];
+      uart_vifApbMaster.wprot_en     = userApbTransaction.wprot_en;
       //Hold one cycle before jumping to ACCESS phase of APB protocol
       repeat (1) @ (posedge uart_vifApbMaster.pclk); 
       //ACCESS state of APB protocol

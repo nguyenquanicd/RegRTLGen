@@ -22,10 +22,18 @@ pulse_conditions    = ["POW", "POW0", "POW1"]
 ## Main process
 for spec_cnt in range(1, len([*RegSpec])):
   spec_sheet  = [*RegSpec][spec_cnt]
+  module_name = RegSpec[spec_sheet]['Common_Config']['GenModuleName']
+  
+  # copy UVM env
   input_path  = script_path + "/../../lib/uvmLib"
-  output_path = script_path + "/../../output/" + RegSpec[spec_sheet]['Common_Config']['GenModuleName'] + "_uvm"
+  output_path = script_path + "/../../output/" + module_name + "_uvm"
   shutil.copytree(input_path, output_path, dirs_exist_ok=True)
   
+  # copy DUT
+  RTL_path = script_path + "/../../output/" + module_name + ".sv"
+  DUT_path = output_path + "/dut/"
+  shutil.copy2(RTL_path, DUT_path)
+
   Interface_content          = ""
   Transaction_content        = ""
   Driver_content_default     = "      default : begin \n"
@@ -39,6 +47,7 @@ for spec_cnt in range(1, len([*RegSpec])):
   Scoreboard_content_regist  = ""
   Scoreboard_content_func    = ""
   Env_content_connect        = ""
+  Top_content_connect        = ""
   
   for reg_cnt in range(1, len([*RegSpec[spec_sheet]])):
     reg_key = [*RegSpec[spec_sheet]][reg_cnt]
@@ -69,6 +78,7 @@ for spec_cnt in range(1, len([*RegSpec])):
     Monitor_content_assign     = f"        co_{GenRegName}_monitor.{GenRegName}_reg = vif_RegConfig_IF.{GenRegName}_reg; \n"
     Scoreboard_content_var    += f"  logic [31:0] {GenRegName}_reg; \n"
     Scoreboard_content_assign += f"    {GenRegName}_reg = {GenRegName}_Trans.{GenRegName}_reg; \n"
+    Top_content_connect       += f"    .{GenRegName}_reg(vRegConfig_Interface_Top.{GenRegName}_reg), \n"
     
     # output logic $GenRegName_read_en
     for strobe_cnt in range (0, len([*RegSpec[spec_sheet][reg_key]['Common_Config']['RW_Property']])):
@@ -81,6 +91,7 @@ for spec_cnt in range(1, len([*RegSpec])):
         Monitor_content_assign     += f"        co_{GenRegName}_monitor.{GenRegName}_read_en = vif_RegConfig_IF.{GenRegName}_read_en; \n"
         Scoreboard_content_var     += f"  logic {GenRegName}_read_en; \n"
         Scoreboard_content_assign  += f"    {GenRegName}_read_en = {GenRegName}_Trans.{GenRegName}_read_en; \n"
+        Top_content_connect        += f"    .{GenRegName}_read_en(vRegConfig_Interface_Top.{GenRegName}_read_en), \n"
         break
     
     # output logic [REGGEN_STRB_WIDTH-1:0] $GenRegName_byte_we
@@ -99,6 +110,7 @@ for spec_cnt in range(1, len([*RegSpec])):
         Monitor_content_assign     += f"        co_{GenRegName}_monitor.{GenRegName}_byte_we = vif_RegConfig_IF.{GenRegName}_byte_we; \n"
         Scoreboard_content_var     += f"  logic [3:0] {GenRegName}_byte_we; \n"
         Scoreboard_content_assign  += f"    {GenRegName}_byte_we = {GenRegName}_Trans.{GenRegName}_byte_we; \n"
+        Top_content_connect        += f"    .{GenRegName}_byte_we(vRegConfig_Interface_Top.{GenRegName}_byte_we), \n"
         break
         
     # input logic [REGGEN_DATA_WIDTH-1:0] $GenRegName_ivalue
@@ -120,6 +132,7 @@ for spec_cnt in range(1, len([*RegSpec])):
         Monitor_content_assign     += f"        co_{GenRegName}_monitor.{GenRegName}_ivalue = vif_RegConfig_IF.{GenRegName}_ivalue; \n"
         Scoreboard_content_var     += f"  logic [31:0] {GenRegName}_ivalue; \n"
         Scoreboard_content_assign  += f"    {GenRegName}_ivalue = {GenRegName}_Trans.{GenRegName}_ivalue; \n"
+        Top_content_connect        += f"    .{GenRegName}_ivalue(vRegConfig_Interface_Top.{GenRegName}_ivalue), \n"
         break  
 
     for field_cnt in range(1, len([*RegSpec[spec_sheet][reg_key]])):
@@ -144,6 +157,7 @@ for spec_cnt in range(1, len([*RegSpec])):
           Monitor_content_assign     += f"        co_{GenRegName}_monitor.{GenRegName}_{GenRegField}_iwe = vif_RegConfig_IF.{GenRegName}_{GenRegField}_iwe; \n"
           Scoreboard_content_var     += f"  logic {GenRegName}_{GenRegField}_iwe; \n"
           Scoreboard_content_assign  += f"    {GenRegName}_{GenRegField}_iwe = {GenRegName}_Trans.{GenRegName}_{GenRegField}_iwe; \n"
+          Top_content_connect        += f"    .{GenRegName}_{GenRegField}_iwe(vRegConfig_Interface_Top.{GenRegName}_{GenRegField}_iwe), \n"
           break
 
       for split_cnt in range(1, len([*RegSpec[spec_sheet][reg_key][field_key]])):
@@ -159,6 +173,7 @@ for spec_cnt in range(1, len([*RegSpec])):
           Monitor_content_assign     += f"        co_{GenRegName}_monitor.{GenRegName}_{GenRegField}_{GenPStrbIndex}_w1 = vif_RegConfig_IF.{GenRegName}_{GenRegField}_{GenPStrbIndex}_w1; \n"
           Scoreboard_content_var     += f"  logic {GenRegName}_{GenRegField}_{GenPStrbIndex}_w1; \n"
           Scoreboard_content_assign  += f"    {GenRegName}_{GenRegField}_{GenPStrbIndex}_w1 = {GenRegName}_Trans.{GenRegName}_{GenRegField}_{GenPStrbIndex}_w1; \n"
+          Top_content_connect        += f"    .{GenRegName}_{GenRegField}_{GenPStrbIndex}_w1(vRegConfig_Interface_Top.{GenRegName}_{GenRegField}_{GenPStrbIndex}_w1), \n"
         # output logic $GenRegName_$GenRegField_$GenPStrbIndex_w0
         if 'POW0' in RegSpec[spec_sheet][reg_key][field_key][split_key]['RW_Property']:
           Interface_content          += f"  logic {GenRegName}_{GenRegField}_{GenPStrbIndex}_w0; \n"
@@ -168,6 +183,7 @@ for spec_cnt in range(1, len([*RegSpec])):
           Monitor_content_assign     += f"        co_{GenRegName}_monitor.{GenRegName}_{GenRegField}_{GenPStrbIndex}_w0 = vif_RegConfig_IF.{GenRegName}_{GenRegField}_{GenPStrbIndex}_w0; \n"
           Scoreboard_content_var     += f"  logic {GenRegName}_{GenRegField}_{GenPStrbIndex}_w0; \n"
           Scoreboard_content_assign  += f"    {GenRegName}_{GenRegField}_{GenPStrbIndex}_w0 = {GenRegName}_Trans.{GenRegName}_{GenRegField}_{GenPStrbIndex}_w0; \n"
+          Top_content_connect        += f"    .{GenRegName}_{GenRegField}_{GenPStrbIndex}_w0(vRegConfig_Interface_Top.{GenRegName}_{GenRegField}_{GenPStrbIndex}_w0), \n"
           
     Transaction_content += f"""
 class {GenRegName}_monitor extends uvm_sequence_item;
@@ -308,6 +324,24 @@ endclass: {GenRegName}_monitor
     else:
       line_print += line
   final_path = output_path + "/uvm_comp/RegRTL_Env.sv"
+  uvm_final = open(final_path, "w")
+  uvm_final.write(line_print)
+  uvm_final.close()
+  
+  # Create: RegRTL_Top.sv
+  sample_path = input_path + "/sim/RegRTL_Top.sv"
+  uvm_sample = open(sample_path, "r")
+  lines = uvm_sample.readlines()
+  line_print = ""
+  for line in lines:
+    if '  dut_top dut_top(' in line:
+      line_print += f"  {module_name} {module_name}( \n"
+    elif '//RegConfig Interface' in line:
+      line_print += line
+      line_print += Top_content_connect
+    else:
+      line_print += line
+  final_path = output_path + "/sim/RegRTL_Top.sv"
   uvm_final = open(final_path, "w")
   uvm_final.write(line_print)
   uvm_final.close()

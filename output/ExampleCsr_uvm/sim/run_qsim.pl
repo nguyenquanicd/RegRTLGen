@@ -1,7 +1,5 @@
 #!/bin/perl
 
-# #!/bin/perl
-
 #---------------------------------------------
 #The installed directory of Simulation tool 
 #---------------------------------------------
@@ -28,7 +26,7 @@ if ($ARGV[0] eq "MERGE_COVERAGE") {
 
 	system "$vcover";
 } else {
-	system "cp -f ../pat/$ARGV[0]/cVSequence.sv ../uvm_comp/.";
+	system "cp -f ../pat/$ARGV[0]/RegRTL_Sequence.sv ../uvm_comp/.";
 
 	#---------------------------------------------
 	#Compilation
@@ -39,18 +37,9 @@ if ($ARGV[0] eq "MERGE_COVERAGE") {
 	+define+UVM_NO_DPI \\
 	+define+INTERRUPT_COM \\
 	+incdir+C:/questasim64_10.2c/uvm-1.2/src \\
+  -y ../dut \\
 	-sv \\
-	../dut/uart_apb_if.v \\
-	../dut/uart_receiver.v \\
-	../dut/uart_transmitter.v \\
-	../dut/uart_top.v \\
-	../dut/dut_top.v \\
-	../checker/apb_protocol_checker.sv \\
-	../checker/apb_protocol_checker_top.sv \\
-	../checker/uart_protocol_checker.sv \\
-	../checker/uart_protocol_checker_top.sv \\
-	../uvm_comp/ifDut.sv \\
-	testTop.sv \\
+	RegRTL_Top.sv \\
 	-timescale 1ns/1ns \\
 	-l vlog.log \\
 	+cover=bcestf \\
@@ -61,8 +50,8 @@ if ($ARGV[0] eq "MERGE_COVERAGE") {
 	#---------------------------------------------
 	#Simulation
 	#---------------------------------------------
-	my $vsim = "$VSim -c -novopt work.testTop \\
-	+UVM_TESTNAME=cTest \\
+	my $vsim = "$VSim -c -novopt work.RegRTL_Top \\
+	+UVM_TESTNAME=RegRTL_Test \\
 	+UVM_VERBOSITY=UVM_LOW \\
 	-do \"coverage save -codeAll -cvg -onexit $ARGV[0].ucdb; run -all;\" \\
 	-coverage \\
@@ -82,5 +71,5 @@ if ($ARGV[0] eq "MERGE_COVERAGE") {
     # my $vcover = "$VCov report -html -code bcestf -stmtaltflow -cvg $ARGV[0].ucdb";
     my $vcover = "$VCov report -html -code bcestf -cvg $ARGV[0].ucdb";
 	
-	system "$vcover";
+	#system "$vcover";
 }
