@@ -17,26 +17,26 @@ module RegRTL_Top;
   //Import UVM package
   import uvm_pkg::*;
   //Include all used classes
-  `include "APB_Agent.sv"
-  `include "APB_Driver.sv"
   `include "APB_Interface.sv"
-  `include "APB_Monitor.sv"
+  `include "APB_Transaction.sv"
   `include "APB_Sequencer.sv"
   `include "APB_Sequence.sv"
-  `include "APB_Transaction.sv"
+  `include "APB_Driver.sv"
+  `include "APB_Monitor.sv"
+  `include "APB_Agent.sv"
   
-  `include "RegConfig_Agent.sv"
-  `include "RegConfig_Driver.sv"
   `include "RegConfig_Interface.sv"
-  `include "RegConfig_Monitor.sv"
+  `include "RegConfig_Transaction.sv"
   `include "RegConfig_Sequencer.sv"
   `include "RegConfig_Sequence.sv"
-  `include "RegConfig_Transaction.sv"
-  
-  `include "RegRTL_Env.sv"
+  `include "RegConfig_Driver.sv"
+  `include "RegConfig_Monitor.sv"
+  `include "RegConfig_Agent.sv"
+
   `include "RegRTL_Scoreboard.sv"
   `include "RegRTL_Sequencer.sv"
   `include "RegRTL_Sequence.sv"
+  `include "RegRTL_Env.sv"
   `include "RegRTL_Test.sv"
   
   //Interface declaration

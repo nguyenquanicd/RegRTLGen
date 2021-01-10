@@ -1,0 +1,19 @@
+QuestaSim-64 vlog 10.4c Compiler 2015.07 Jul 20 2015
+Start time: 03:22:30 on Jan 10,2021
+vlog -work work "+define+UVM_CMDLINE_NO_DPI" "+define+UVM_REGEX_NO_DPI" "+define+UVM_NO_DPI" "+define+INTERRUPT_COM" "+incdir+D:/Work/QuestaSim10.4/QS/verilog_src/uvm-1.2/src" "+incdir+D:/Work/RegRTLGen/output/ExampleCsr_uvm/uvm_comp" -y D:/Work/RegRTLGen/output/ExampleCsr_uvm/dut -sv ./RegRTL_Top.sv -timescale 1ns/1ns -l vlog.log "+cover=bcestf" -coveropt 1 
+-- Compiling package uvm_pkg (uvm-1.2 Built-in)
+-- Compiling module RegRTL_Top
+-- Importing package uvm_pkg (uvm-1.2 Built-in)
+-- Compiling interface ifApbMaster
+-- Compiling interface RegConfig_Interface
+-- Scanning library directory 'D:/Work/RegRTLGen/output/ExampleCsr_uvm/dut'
+
+Referenced (but uncompiled) modules or primitives:
+	ifApbMaster
+	RegConfig_Interface
+	ExampleCsr
+
+Top level modules:
+	RegRTL_Top
+End time: 03:22:31 on Jan 10,2021, Elapsed time: 0:00:01
+Errors: 0, Warnings: 0

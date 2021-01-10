@@ -6,11 +6,11 @@ vlog -work work \
   +define+UVM_REGEX_NO_DPI \
   +define+UVM_NO_DPI \
   +define+INTERRUPT_COM \
-  +incdir+C:/questasim64_10.2c/uvm-1.2/src \
-  +incdir+../uvm_comp \
-  -y ../dut \
+  +incdir+D:/Work/QuestaSim10.4/QS/verilog_src/uvm-1.2/src \
+  +incdir+D:/Work/RegRTLGen/output/ExampleCsr_uvm/uvm_comp \
+  -y D:/Work/RegRTLGen/output/ExampleCsr_uvm/dut \
   -sv \
-  RegRTL_Top.sv \
+  ./RegRTL_Top.sv \
   -timescale 1ns/1ns \
   -l vlog.log \
   +cover

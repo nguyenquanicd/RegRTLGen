@@ -3,7 +3,7 @@
 #---------------------------------------------
 #The installed directory of Simulation tool 
 #---------------------------------------------
-my $SIM_TOOL = "C:/questasim64_10.2c/win64";
+my $SIM_TOOL = "D:/Work/QuestaSim10.4/QS/win64";
 print "-- Simulate on $SIM_TOOL\n";
 
 #---------------------------------------------
@@ -26,7 +26,7 @@ if ($ARGV[0] eq "MERGE_COVERAGE") {
 
 	system "$vcover";
 } else {
-	system "cp -f ../pat/$ARGV[0]/RegRTL_Sequence.sv ../uvm_comp/.";
+	#system "cp -f ../pat/$ARGV[0]/RegRTL_Sequence.sv ../uvm_comp/.";
 
 	#---------------------------------------------
 	#Compilation
@@ -36,10 +36,11 @@ if ($ARGV[0] eq "MERGE_COVERAGE") {
 	+define+UVM_REGEX_NO_DPI \\
 	+define+UVM_NO_DPI \\
 	+define+INTERRUPT_COM \\
-	+incdir+C:/questasim64_10.2c/uvm-1.2/src \\
-  -y ../dut \\
+	+incdir+D:/Work/QuestaSim10.4/QS/verilog_src/uvm-1.2/src \\
+	+incdir+D:/Work/RegRTLGen/output/ExampleCsr_uvm/uvm_comp \\
+    -y D:/Work/RegRTLGen/output/ExampleCsr_uvm/dut \\
 	-sv \\
-	RegRTL_Top.sv \\
+	./RegRTL_Top.sv \\
 	-timescale 1ns/1ns \\
 	-l vlog.log \\
 	+cover=bcestf \\
