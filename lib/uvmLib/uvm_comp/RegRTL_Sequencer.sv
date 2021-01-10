@@ -18,5 +18,5 @@ class RegRTL_Sequencer extends uvm_sequencer#(cApbTransaction);
 
   function void build_phase(uvm_phase phase);
     super.build_phase(phase);
-  endfunction: void
+  endfunction: build_phase
 endclass: RegRTL_Sequencer
