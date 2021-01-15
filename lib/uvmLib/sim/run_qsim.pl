@@ -3,7 +3,7 @@
 #---------------------------------------------
 #The installed directory of Simulation tool 
 #---------------------------------------------
-my $SIM_TOOL = "D:/Work/QuestaSim10.4/QS/win64";
+my $SIM_TOOL = "C:/questasim64_10.2c/win64";
 print "-- Simulate on $SIM_TOOL\n";
 
 #---------------------------------------------
@@ -36,15 +36,16 @@ if ($ARGV[0] eq "MERGE_COVERAGE") {
 	+define+UVM_REGEX_NO_DPI \\
 	+define+UVM_NO_DPI \\
 	+define+INTERRUPT_COM \\
-	+incdir+D:/Work/QuestaSim10.4/QS/verilog_src/uvm-1.2/src \\
-	+incdir+D:/Work/RegRTLGen/output/ExampleCsr_uvm/uvm_comp \\
-    -y D:/Work/RegRTLGen/output/ExampleCsr_uvm/dut \\
+	+incdir+C:/questasim64_10.2c/verilog_src/uvm-1.1d/src \\
+	+incdir+D:/GitHub/RegRTLGen/output/ExampleCsr_uvm/uvm_comp \\
+  -y D:/GitHub/RegRTLGen/output/ExampleCsr_uvm/dut \\
 	-sv \\
 	./RegRTL_Top.sv \\
+  ../dut/ExampleCsr.sv \\
 	-timescale 1ns/1ns \\
 	-l vlog.log \\
 	+cover=bcestf \\
-    -coveropt 1";
+  -coveropt 1";
 	
 	system "$vlog";
 	
@@ -56,7 +57,7 @@ if ($ARGV[0] eq "MERGE_COVERAGE") {
 	+UVM_VERBOSITY=UVM_LOW \\
 	-do \"coverage save -codeAll -cvg -onexit $ARGV[0].ucdb; run -all;\" \\
 	-coverage \\
-    -coveranalysis \\
+  -coveranalysis \\
 	-cvgperinstance \\
 	-l vsim.log";
 	
@@ -68,9 +69,9 @@ if ($ARGV[0] eq "MERGE_COVERAGE") {
 	#---------------------------------------------
 	#Generate html report
 	#---------------------------------------------
-    #my $vcover = "$VCov report -html -htmldir ./ -code bcestf -stmtaltflow -cvg $ARGV[0].ucdb";
-    # my $vcover = "$VCov report -html -code bcestf -stmtaltflow -cvg $ARGV[0].ucdb";
-    my $vcover = "$VCov report -html -code bcestf -cvg $ARGV[0].ucdb";
+  #my $vcover = "$VCov report -html -htmldir ./ -code bcestf -stmtaltflow -cvg $ARGV[0].ucdb";
+  # my $vcover = "$VCov report -html -code bcestf -stmtaltflow -cvg $ARGV[0].ucdb";
+  my $vcover = "$VCov report -html -code bcestf -cvg $ARGV[0].ucdb";
 	
 	#system "$vcover";
 }

@@ -97,9 +97,9 @@ module RegRTL_Top;
   //Connect TOP DUT to UVM components
   initial begin
     //Connect APB interface
-    uvm_config_db#(virtual interface ifApbMaster)::set(null,"uvm_test_top.RegRTL_Env.coApbMasterAgent*","vifApbMaster",vifApbMaster_Top);
+    uvm_config_db#(virtual interface ifApbMaster)::set(null,"uvm_test_top.co_RegRTL_Env.coApbMasterAgent*","vifApbMaster",vifApbMaster_Top);
     //Connect RegConfig interface
-    uvm_config_db#(virtual interface RegConfig_Interface)::set(null,"uvm_test_top.RegRTL_Env.co_RegConfig_Agent*","vif_RegConfig_IF",vRegConfig_Interface_Top);
+    uvm_config_db#(virtual interface RegConfig_Interface)::set(null,"uvm_test_top.co_RegRTL_Env.co_RegConfig_Agent*","vif_RegConfig_IF",vRegConfig_Interface_Top);
   end
   //Run the test pattern
   initial begin

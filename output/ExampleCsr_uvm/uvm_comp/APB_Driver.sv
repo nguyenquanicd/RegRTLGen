@@ -9,7 +9,7 @@
 
 class cApbMasterDriver extends uvm_driver #(cApbTransaction);
   //1. Declare the virtual interface
-  virtual ifApbMaster uart_vifApbMaster;
+  virtual ifApbMaster reg_vifApbMaster;
   cApbTransaction ApbPacket;
   //2. Register to the factory
   //`uvm_component_utils is for non-parameterized classes
@@ -32,12 +32,12 @@ class cApbMasterDriver extends uvm_driver #(cApbTransaction);
     if (!uvm_config_db#(virtual interface ifApbMaster)::get(.cntxt(this),
         .inst_name(""),
         .field_name("vifApbMaster"),
-        .value(uart_vifApbMaster))) begin
+        .value(reg_vifApbMaster))) begin
        //`uvm_fatal(ID, MSG)
        //ID: message tag
        //MSG message text
        //get_full_name returns the full hierarchical name of the driver object
-       `uvm_fatal("NON-APBIF", {"A virtual interface must be set for: ", get_full_name(), ".uart_vifApbMaster"})
+       `uvm_fatal("NON-APBIF", {"A virtual interface must be set for: ", get_full_name(), ".reg_vifApbMaster"})
     end
       //
     `uvm_info(get_full_name(), "Build phase completed.", UVM_LOW)
@@ -54,15 +54,15 @@ class cApbMasterDriver extends uvm_driver #(cApbTransaction);
   //Initiate all control signals when the reset is active
   //Run time: run until the end of the simulation
   virtual task reset_all();
-    wait (~uart_vifApbMaster.preset_n) begin
-      uart_vifApbMaster.psel    = 1'b0;
-      uart_vifApbMaster.penable = 1'b0;
+    wait (~reg_vifApbMaster.preset_n) begin
+      reg_vifApbMaster.psel    = 1'b0;
+      reg_vifApbMaster.penable = 1'b0;
     end
 
     while (1) begin
-      @ (negedge uart_vifApbMaster.preset_n);
-      uart_vifApbMaster.psel    = 1'b0;
-      uart_vifApbMaster.penable = 1'b0;
+      @ (negedge reg_vifApbMaster.preset_n);
+      reg_vifApbMaster.psel    = 1'b0;
+      reg_vifApbMaster.penable = 1'b0;
     end
 
   endtask: reset_all
@@ -71,8 +71,8 @@ class cApbMasterDriver extends uvm_driver #(cApbTransaction);
   //Run time: run until the end of the simulation
   virtual task get_seq_and_drive();
     forever begin
-      @ (posedge uart_vifApbMaster.preset_n);
-      while (uart_vifApbMaster.preset_n) begin
+      @ (posedge reg_vifApbMaster.preset_n);
+      while (reg_vifApbMaster.preset_n) begin
         //The seq_item_port.get_next_item is used to get items from the sequencer
         seq_item_port.get_next_item(ApbPacket);
         //req is assigned to convert_seq2apb to drive the APB interface
@@ -93,35 +93,35 @@ class cApbMasterDriver extends uvm_driver #(cApbTransaction);
       //If this transfer is back-to-back with the previous transfer,
       //one delay cycle is not inserted
       if (userApbTransaction.apbConEn == 0) begin
-        repeat (1) @ (posedge uart_vifApbMaster.pclk);
+        repeat (1) @ (posedge reg_vifApbMaster.pclk);
       end
       //SETUP state of APB protocol
-      uart_vifApbMaster.psel         = 1'b1;
-      uart_vifApbMaster.pwrite       = userApbTransaction.pwrite;
-      uart_vifApbMaster.paddr[31:0]  = userApbTransaction.paddr[31:0];
-      uart_vifApbMaster.pwdata[31:0] = userApbTransaction.pwdata[31:0];
-      uart_vifApbMaster.pstrb[3:0]   = userApbTransaction.pstrb[3:0];
-      uart_vifApbMaster.pprot[2:0]   = userApbTransaction.pprot[2:0];
-      uart_vifApbMaster.wprot_en     = userApbTransaction.wprot_en;
+      reg_vifApbMaster.psel         = 1'b1;
+      reg_vifApbMaster.pwrite       = userApbTransaction.pwrite;
+      reg_vifApbMaster.paddr[31:0]  = userApbTransaction.paddr[31:0];
+      reg_vifApbMaster.pwdata[31:0] = userApbTransaction.pwdata[31:0];
+      reg_vifApbMaster.pstrb[3:0]   = userApbTransaction.pstrb[3:0];
+      reg_vifApbMaster.pprot[2:0]   = userApbTransaction.pprot[2:0];
+      reg_vifApbMaster.wprot_en     = userApbTransaction.wprot_en;
       //Hold one cycle before jumping to ACCESS phase of APB protocol
-      repeat (1) @ (posedge uart_vifApbMaster.pclk); 
+      repeat (1) @ (posedge reg_vifApbMaster.pclk); 
       //ACCESS state of APB protocol
-      uart_vifApbMaster.penable = 1'b1;
+      reg_vifApbMaster.penable = 1'b1;
       //Store read data if this is a read transaction
-      if (~uart_vifApbMaster.pwrite && uart_vifApbMaster.pready) begin
-         userApbTransaction.prdata[31:0] = uart_vifApbMaster.prdata[31:0];
+      if (~reg_vifApbMaster.pwrite && reg_vifApbMaster.pready) begin
+         userApbTransaction.prdata[31:0] = reg_vifApbMaster.prdata[31:0];
       end
       //Store pslverr
-      userApbTransaction.pslverr = uart_vifApbMaster.pslverr;
+      userApbTransaction.pslverr = reg_vifApbMaster.pslverr;
       //ENABLE phase is hold in one cycle
-      repeat (1) @ (posedge uart_vifApbMaster.pclk);
+      repeat (1) @ (posedge reg_vifApbMaster.pclk);
       //Release psel and penable
-      uart_vifApbMaster.psel    = 1'b0;
-      uart_vifApbMaster.penable = 1'b0;
+      reg_vifApbMaster.psel    = 1'b0;
+      reg_vifApbMaster.penable = 1'b0;
     end
     else begin
-      uart_vifApbMaster.psel    = 1'b0;
-      uart_vifApbMaster.penable = 1'b0;
+      reg_vifApbMaster.psel    = 1'b0;
+      reg_vifApbMaster.penable = 1'b0;
     end
   endtask: convert_seq2apb
 

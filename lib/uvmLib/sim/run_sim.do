@@ -6,11 +6,12 @@ vlog -work work \
   +define+UVM_REGEX_NO_DPI \
   +define+UVM_NO_DPI \
   +define+INTERRUPT_COM \
-  +incdir+D:/Work/QuestaSim10.4/QS/verilog_src/uvm-1.2/src \
-  +incdir+D:/Work/RegRTLGen/output/ExampleCsr_uvm/uvm_comp \
-  -y D:/Work/RegRTLGen/output/ExampleCsr_uvm/dut \
+  +incdir+C:/questasim64_10.2c/verilog_src/uvm-1.1d/src \
+  +incdir+D:/GitHub/RegRTLGen/output/ExampleCsr_uvm/uvm_comp \
+  -y D:/GitHub/RegRTLGen/output/ExampleCsr_uvm/dut \
   -sv \
   ./RegRTL_Top.sv \
+  ../dut/ExampleCsr.sv \
   -timescale 1ns/1ns \
   -l vlog.log \
   +cover
@@ -27,7 +28,7 @@ vsim -novopt work.RegRTL_Top \
 #---------------------------------------------
 #Add some signals to waveform before running
 #---------------------------------------------
-#do add_wave.do
+do add_wave.do
 
 #---------------------------------------------
 #Run

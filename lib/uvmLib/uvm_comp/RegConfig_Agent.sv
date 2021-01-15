@@ -10,9 +10,9 @@ class RegConfig_Agent extends uvm_agent;
   RegConfig_Sequencer co_RegConfig_Sequencer;
   RegConfig_Monitor   co_RegConfig_Monitor;
 
-  `uvm_component_utils(cApbMasterAgent)
+  `uvm_component_utils(RegConfig_Agent)
 
-  function new(string name = "cApbMasterAgent", uvm_component parent);
+  function new(string name = "RegConfig_Agent", uvm_component parent);
       super.new(name, parent);
   endfunction: new
 
