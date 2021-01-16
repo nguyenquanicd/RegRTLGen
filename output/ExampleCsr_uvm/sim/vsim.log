@@ -1,0 +1,75 @@
+# vsim +UVM_TESTNAME=RegRTL_Test +UVM_VERBOSITY=UVM_LOW -coverage -coveranalysis -do {coverage save -codeAll -cvg -onexit test.ucdb; do add_wave.do; run -all;} -l vsim.log -c -cvgperinstance -novopt work.RegRTL_Top 
+# //  Questa Sim-64
+# //  Version 10.2c Unknown Platform Jul 19 2013
+# //
+# //  Copyright 1991-2013 Mentor Graphics Corporation
+# //  All Rights Reserved.
+# //
+# //  THIS WORK CONTAINS TRADE SECRET AND PROPRIETARY INFORMATION
+# //  WHICH IS THE PROPERTY OF MENTOR GRAPHICS CORPORATION OR ITS
+# //  LICENSORS AND IS SUBJECT TO LICENSE TERMS.
+# //
+# Refreshing D:/GitHub/RegRTLGen/output/ExampleCsr_uvm/sim/work.RegRTL_Top
+# Refreshing D:/GitHub/RegRTLGen/output/ExampleCsr_uvm/sim/work.uvm_pkg
+# Loading sv_std.std
+# Loading work.uvm_pkg
+# Loading work.RegRTL_Top
+# ** Note: (vsim-8785) UVM-aware debugging capabilities will be disabled since no compiled "questa_uvm_pkg" can be found.
+# 
+# This also means that later if you turn on UVM-aware debugging your debug simulations may have
+# 
+# different random seeds from your non-debug simulations.
+# 
+# Refreshing D:/GitHub/RegRTLGen/output/ExampleCsr_uvm/sim/work.ExampleCsr
+# Loading work.ExampleCsr
+# ** Warning: (vsim-3015) ./RegRTL_Top.sv(97): [PCDPC] - Port size (16 or 16) does not match connection size (32) for port 'paddr'. The port definition is at: ../dut/ExampleCsr.sv(67).
+# 
+#         Region: /RegRTL_Top/ExampleCsr
+# coverage save -codeAll -cvg -onexit test.ucdb 
+#  do add_wave.do 
+#  run -all 
+# ----------------------------------------------------------------
+# UVM-1.1d
+# (C) 2007-2013 Mentor Graphics Corporation
+# (C) 2007-2013 Cadence Design Systems, Inc.
+# (C) 2006-2013 Synopsys, Inc.
+# (C) 2011-2013 Cypress Semiconductor Corp.
+# ----------------------------------------------------------------
+# 
+#   ***********       IMPORTANT RELEASE NOTES         ************
+# 
+#   You are using a version of the UVM library that has been compiled
+#   with `UVM_NO_DEPRECATED undefined.
+#   See http://www.eda.org/svdb/view.php?id=3313 for more details.
+# 
+#   You are using a version of the UVM library that has been compiled
+#   with `UVM_OBJECT_MUST_HAVE_CONSTRUCTOR undefined.
+#   See http://www.eda.org/svdb/view.php?id=3770 for more details.
+# 
+#       (Specify +UVM_NO_RELNOTES to turn off this notice)
+# 
+# UVM_INFO C:/questasim64_10.2c/verilog_src/uvm-1.1d/src/base/uvm_root.svh(370) @ 0: reporter [NO_DPI_TSTNAME] UVM_NO_DPI defined--getting UVM_TESTNAME directly, without DPI
+# UVM_INFO @ 0: reporter [RNTST] Running test RegRTL_Test...
+# UVM_INFO D:/GitHub/RegRTLGen/output/ExampleCsr_uvm/uvm_comp/APB_Driver.sv(43) @ 0: uvm_test_top.co_RegRTL_Env.coApbMasterAgent.coApbMasterDriver [uvm_test_top.co_RegRTL_Env.coApbMasterAgent.coApbMasterDriver] Build phase completed.
+# UVM_INFO D:/GitHub/RegRTLGen/output/ExampleCsr_uvm/uvm_comp/RegConfig_Driver.sv(28) @ 0: uvm_test_top.co_RegRTL_Env.co_RegConfig_Agent.co_RegConfig_Driver [uvm_test_top.co_RegRTL_Env.co_RegConfig_Agent.co_RegConfig_Driver] Build phase completed.
+# UVM_INFO D:/GitHub/RegRTLGen/output/ExampleCsr_uvm/uvm_comp/RegRTL_Scoreboard.sv(54) @ 25: uvm_test_top.co_RegRTL_Env.co_RegRTL_Scoreboard [RegRTL RESET] [                  25] preset_n signal is acting
+# UVM_INFO D:/GitHub/RegRTLGen/output/ExampleCsr_uvm/uvm_comp/RegRTL_Scoreboard.sv(62) @ 125: uvm_test_top.co_RegRTL_Env.co_RegRTL_Scoreboard [RegRTL APB] [                 125] APB transaction
+# UVM_INFO C:/questasim64_10.2c/verilog_src/uvm-1.1d/src/base/uvm_objection.svh(1268) @ 175: reporter [TEST_DONE] 'run' phase is ready to proceed to the 'extract' phase
+# 
+# --- UVM Report Summary ---
+# 
+# ** Report counts by severity
+# UVM_INFO :    7
+# UVM_WARNING :    0
+# UVM_ERROR :    0
+# UVM_FATAL :    0
+# ** Report counts by id
+# [NO_DPI_TSTNAME]     1
+# [RNTST]     1
+# [RegRTL APB]     1
+# [RegRTL RESET]     1
+# [TEST_DONE]     1
+# [uvm_test_top.co_RegRTL_Env.coApbMasterAgent.coApbMasterDriver]     1
+# [uvm_test_top.co_RegRTL_Env.co_RegConfig_Agent.co_RegConfig_Driver]     1
+# ** Note: $finish    : C:/questasim64_10.2c/verilog_src/uvm-1.1d/src/base/uvm_root.svh(430)
+#    Time: 175 ns  Iteration: 65  Instance: /RegRTL_Top

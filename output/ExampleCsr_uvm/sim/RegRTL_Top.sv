@@ -78,6 +78,8 @@ module RegRTL_Top;
     .BCTRL_ROS_iwe(vRegConfig_Interface_Top.BCTRL_ROS_iwe), 
     .BCTRL_ROC_iwe(vRegConfig_Interface_Top.BCTRL_ROC_iwe), 
     .BCTRL_RO_iwe(vRegConfig_Interface_Top.BCTRL_RO_iwe), 
+    .reg_clk(vifApbMaster_Top.pclk),
+    .reg_rst_n(vifApbMaster_Top.preset_n),
      //APB Interface
     .pclk(vifApbMaster_Top.pclk),
     .preset_n(vifApbMaster_Top.preset_n),

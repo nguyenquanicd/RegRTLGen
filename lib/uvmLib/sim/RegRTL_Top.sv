@@ -62,6 +62,8 @@ module RegRTL_Top;
   //TOP DUT instance
   dut_top dut_top(
      //RegConfig Interface
+    .reg_clk(vifApbMaster_Top.pclk),
+    .reg_rst_n(vifApbMaster_Top.preset_n),
      //APB Interface
     .pclk(vifApbMaster_Top.pclk),
     .preset_n(vifApbMaster_Top.preset_n),

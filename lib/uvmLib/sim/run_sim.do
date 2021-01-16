@@ -5,10 +5,8 @@ vlog -work work \
   +define+UVM_CMDLINE_NO_DPI \
   +define+UVM_REGEX_NO_DPI \
   +define+UVM_NO_DPI \
-  +define+INTERRUPT_COM \
   +incdir+C:/questasim64_10.2c/verilog_src/uvm-1.1d/src \
   +incdir+D:/GitHub/RegRTLGen/output/ExampleCsr_uvm/uvm_comp \
-  -y D:/GitHub/RegRTLGen/output/ExampleCsr_uvm/dut \
   -sv \
   ./RegRTL_Top.sv \
   ../dut/ExampleCsr.sv \
