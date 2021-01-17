@@ -20,7 +20,9 @@ class RegRTL_Sequence extends uvm_sequence#(cApbTransaction);
 
   task body();
     #50ns
-    `RegConfig(32'h00000008,0,31,0,1)
-    `ApbWrite(32'h00000008,32'h00000006)
+    `RegConfig(32'h00000008,32'hffffffff,31,0,1)
+    #50ns
+    `ApbWrite(32'h00000008,32'haaaaaaaa)
+    `ApbRead(32'h00000008,32'haaaaaaaa,32'hffffffff)
   endtask: body
 endclass: RegRTL_Sequence
