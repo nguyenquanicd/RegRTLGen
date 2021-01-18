@@ -107,6 +107,8 @@ class cApbMasterDriver extends uvm_driver #(cApbTransaction);
       repeat (1) @ (posedge reg_vifApbMaster.pclk); 
       //ACCESS state of APB protocol
       reg_vifApbMaster.penable = 1'b1;
+      #1ns
+      @ (reg_vifApbMaster.pready);
       //Store read data if this is a read transaction
       if (~reg_vifApbMaster.pwrite && reg_vifApbMaster.pready) begin
          userApbTransaction.prdata[31:0] = reg_vifApbMaster.prdata[31:0];
