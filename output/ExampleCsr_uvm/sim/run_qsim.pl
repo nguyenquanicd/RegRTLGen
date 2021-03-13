@@ -14,6 +14,8 @@ my $VLog    = "$SIM_TOOL/vlog.exe";
 my $VSim    = "$SIM_TOOL/vsim.exe";
 my $VCov    = "$SIM_TOOL/vcover.exe";
 
+my $dut     = "ExampleCsr";
+
 if ($ARGV[0] eq "MERGE_COVERAGE") {
   #---------------------------------------------
   #Merge coverage
@@ -33,16 +35,16 @@ if ($ARGV[0] eq "MERGE_COVERAGE") {
   #Compilation
   #---------------------------------------------
   #+incdir+C:/questasim64_10.2c/verilog_src/uvm-1.1d/src \\
-  #+incdir+D:/GitHub/RegRTLGen/output/ExampleCsr_uvm/uvm_comp \\
+  #+incdir+D:/GitHub/RegRTLGen/output/${dut}_uvm/uvm_comp \\
   my $vlog = "$VLog -work work \\
   +define+UVM_CMDLINE_NO_DPI \\
   +define+UVM_REGEX_NO_DPI \\
   +define+UVM_NO_DPI \\
   +incdir+D:/Work/QuestaSim10.4/QS/verilog_src/uvm-1.1d/src \\
-  +incdir+D:/Work/RegRTLGen/output/ExampleCsr_uvm/uvm_comp \\
+  +incdir+D:/Work/RegRTLGen/output/${dut}_uvm/uvm_comp \\
   -sv \\
   ./RegRTL_Top.sv \\
-  ../dut/ExampleCsr.sv \\
+  ../dut/$dut.sv \\
   -timescale 1ns/1ns \\
   -l vlog.log \\
   +cover=bcestf \\
@@ -73,6 +75,5 @@ if ($ARGV[0] eq "MERGE_COVERAGE") {
   #my $vcover = "$VCov report -html -htmldir ./ -code bcestf -stmtaltflow -cvg $ARGV[0].ucdb";
   #my $vcover = "$VCov report -html -code bcestf -stmtaltflow -cvg $ARGV[0].ucdb";
   my $vcover = "$VCov report -html -code bcestf -cvg $ARGV[0].ucdb";
-  
-  #system "$vcover";
+  system "$vcover";
 }

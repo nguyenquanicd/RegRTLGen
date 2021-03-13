@@ -1,19 +1,20 @@
 onerror {resume}
 quietly WaveActivateNextPane {} 0
-add wave -noupdate -divider -height 23 {REG RTL}
-add wave -noupdate /RegRTL_Top/ExampleCsr/pclk
-add wave -noupdate /RegRTL_Top/ExampleCsr/preset_n
-add wave -noupdate /RegRTL_Top/ExampleCsr/pwrite
-add wave -noupdate /RegRTL_Top/ExampleCsr/psel
-add wave -noupdate /RegRTL_Top/ExampleCsr/penable
-add wave -noupdate /RegRTL_Top/ExampleCsr/paddr
-add wave -noupdate /RegRTL_Top/ExampleCsr/pwdata
-add wave -noupdate /RegRTL_Top/ExampleCsr/pstrb
-add wave -noupdate /RegRTL_Top/ExampleCsr/prdata
-add wave -noupdate /RegRTL_Top/ExampleCsr/pready
-add wave -noupdate /RegRTL_Top/ExampleCsr/pslverr
-add wave -noupdate /RegRTL_Top/ExampleCsr/pprot
-add wave -noupdate /RegRTL_Top/ExampleCsr/write_protect_en
+add wave -noupdate -divider -height 23 {APB SIGNAL}
+add wave -noupdate /RegRTL_Top/module_name_here/pclk
+add wave -noupdate /RegRTL_Top/module_name_here/preset_n
+add wave -noupdate /RegRTL_Top/module_name_here/penable
+add wave -noupdate /RegRTL_Top/module_name_here/psel
+add wave -noupdate /RegRTL_Top/module_name_here/pready
+add wave -noupdate /RegRTL_Top/module_name_here/paddr
+add wave -noupdate /RegRTL_Top/module_name_here/pwrite
+add wave -noupdate /RegRTL_Top/module_name_here/pwdata
+add wave -noupdate /RegRTL_Top/module_name_here/pstrb
+add wave -noupdate /RegRTL_Top/module_name_here/prdata
+add wave -noupdate /RegRTL_Top/module_name_here/pslverr
+add wave -noupdate /RegRTL_Top/module_name_here/pprot
+add wave -noupdate /RegRTL_Top/module_name_here/write_protect_en
+add wave -noupdate -divider -height 23 {USER SIGNAL}
 TreeUpdate [SetDefaultTree]
 #WaveRestoreCursors {{Cursor 1} {925 ns} 0}
 #quietly wave cursor active 1
