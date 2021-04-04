@@ -19,9 +19,13 @@ output: RTL and document specification are created by RegRTLGen
 work  : Working folder contains the main script
 
 # How to run
+
 cd work
+
 ./RegRTLGen.py ../input/<spec file>
+  
 cd ../ouput/<module name>_uvm/sim
+  
 ./run_qsim.pl
 
 #END
