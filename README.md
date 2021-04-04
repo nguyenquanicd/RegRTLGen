@@ -22,9 +22,9 @@ work  : Working folder contains the main script
 
 cd work
 
-./RegRTLGen.py ../input/<spec file>
+./RegRTLGen.py ../input/RegSpec_Org.xlsx
   
-cd ../ouput/<module name>_uvm/sim
+cd ../ouput/ExampleCsr_uvm/sim
   
 ./run_qsim.pl
 
