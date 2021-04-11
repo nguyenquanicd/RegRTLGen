@@ -56,10 +56,10 @@ printLog (LOGFILE, $headerFile);
 #The installed directory of Simulation tool 
 #---------------------------------------------
 #my $SRC_TOOL = "D:/Work/QuestaSim10.4/QS";
-my $SRC_TOOL = "C:/questasim64_10.2c";
-#my $SRC_TOOL = "C:/questasim64_10.4c";
-my $UVM_ver = "1.1d";
-#my $UVM_ver = "1.2";
+#my $SRC_TOOL = "C:/questasim64_10.2c";
+my $SRC_TOOL = "C:/questasim64_10.4c";
+#my $UVM_ver = "1.1d";
+my $UVM_ver = "1.2";
 
 my $SIM_TOOL = "$SRC_TOOL/win64";
 my $UVM_LIB  = "$SRC_TOOL/verilog_src/uvm-$UVM_ver/src";
