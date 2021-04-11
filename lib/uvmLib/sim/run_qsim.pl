@@ -1,5 +1,8 @@
-#!/bin/perl
-use Switch;
+#!/usr/bin/perl
+
+use feature qw(switch);
+no warnings 'experimental';
+
 #----------------------------------
 #Website  :  http://nguyenquanicd.blogspot.com/
 #Author   :  Le Hoang Van, Tran Huu Duy, Nguyen Hung Quan
@@ -53,9 +56,14 @@ printLog (LOGFILE, $headerFile);
 #The installed directory of Simulation tool 
 #---------------------------------------------
 #my $SRC_TOOL = "D:/Work/QuestaSim10.4/QS";
-my $SRC_TOOL = "C:/questasim64_10.4c";
+my $SRC_TOOL = "C:/questasim64_10.2c";
+#my $SRC_TOOL = "C:/questasim64_10.4c";
+my $UVM_ver = "1.1d";
+#my $UVM_ver = "1.2";
+
 my $SIM_TOOL = "$SRC_TOOL/win64";
-my $UVM_LIB  = "$SRC_TOOL/verilog_src/uvm-1.2/src";
+my $UVM_LIB  = "$SRC_TOOL/verilog_src/uvm-$UVM_ver/src";
+
 printLog (LOGFILE, "----------------------------------------\n");
 printLog (LOGFILE, "-- Simulation tool : $SIM_TOOL\n");
 printLog (LOGFILE, "-- UVM library     : $UVM_LIB\n");
@@ -63,26 +71,25 @@ printLog (LOGFILE, "----------------------------------------\n");
 #----------------------------------
 # Scan arguments and assign the setting values
 #----------------------------------
-#Note: Must have "use Switch" when using switch
 my $dut    = "ExampleCsr"; #Default DUT
 my $covrpt = $dut; #Default coverage report
 my $covm   = 0;
 while ($argNum != 0) {
   my $arg = shift(@ARGV); #Get an argument
-  switch($arg) {
+  given($arg) {
     #Get DUT name
-    case "-dut" {
+    when ("-dut") {
       $dut = shift(@ARGV);
     }
     #Get coverage report name
-    case "-cov" {
+    when ("-cov") {
       $covrpt = shift(@ARGV);
     }
     #Merge coverage reports
-    case "-covm" {
+    when ("-covm") {
       $covm = 1;
     }
-    case "-help" {
+    when ("-help") {
       printLog (LOGFILE, "#----------------------------------\n");
       printLog (LOGFILE, "Format: $myScript <option 0> <value 0> ... <option N> <value N>\n");
       printLog (LOGFILE, "  Option:\n");
@@ -93,7 +100,7 @@ while ($argNum != 0) {
       printLog (LOGFILE, "#----------------------------------\n");
       exit;
     }
-    else {
+    default {
       printLog (LOGFILE, "[ERROR] Do NOT support the option: $arg\n");
       system "./$myScript -help";
       exit;
@@ -118,7 +125,7 @@ if ($covm eq "1") {
   system "$vmerge";
   
   my $vcover = "$VCov report -html -htmldir ./ -code bcestf -cvg mergedCov.ucdb";
-  #my $vcover = "$VCov report -html -htmldir ./ -stmtaltflow -cvg cov.ucdb";
+  #my $vcover = "$VCov report -html -htmldir ./ -stmtaltflow -cvg mergedCov.ucdb";
   
   system "$vcover";
 } else {
@@ -127,8 +134,6 @@ if ($covm eq "1") {
   #---------------------------------------------
   #Compilation
   #---------------------------------------------
-  #+incdir+C:/questasim64_10.2c/verilog_src/uvm-1.1d/src \\
-  #+incdir+D:/GitHub/RegRTLGen/output/${dut}_uvm/uvm_comp \\
   my $vlog = "$VLog -work work \\
   +define+UVM_CMDLINE_NO_DPI \\
   +define+UVM_REGEX_NO_DPI \\
@@ -151,7 +156,7 @@ if ($covm eq "1") {
   my $vsim = "$VSim -c -novopt work.RegRTL_Top \\
   +UVM_TESTNAME=RegRTL_Test \\
   +UVM_VERBOSITY=UVM_LOW \\
-  -do \"coverage save -codeAll -cvg -onexit $cov.ucdb; do add_wave.do; run -all;\" \\
+  -do \"coverage save -codeAll -cvg -onexit $covrpt.ucdb; do add_wave.do; run -all;\" \\
   -coverage \\
   -coveranalysis \\
   -cvgperinstance \\

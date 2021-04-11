@@ -27,7 +27,8 @@ for spec_cnt in range(1, len([*RegSpec])):
   # copy UVM env
   input_path  = script_path + "/../../lib/uvmLib"
   output_path = script_path + "/../../output/" + module_name + "_uvm"
-  shutil.rmtree(output_path)
+  if os.path.isdir(output_path) :
+    shutil.rmtree(output_path)
   shutil.copytree(input_path, output_path, dirs_exist_ok=True)
   
   # copy DUT
