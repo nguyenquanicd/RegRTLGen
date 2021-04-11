@@ -22,10 +22,14 @@ work  : Working folder contains the main script
 
 cd work
 
-./RegRTLGen.py ../input/RegSpec_Org.xlsx
+./RegRTLGen.py ../input/RegSpec_Org.xlsx (Python 3.8 or later)
   
 cd ../ouput/ExampleCsr_uvm/sim
   
-./run_qsim.pl
+./run_qsim.pl (run the default DUT)
+
+# Note
+
+./run_qsim.pl -help (show all options)
 
 #END
